@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clases con Supervisión — Audio + Video Completo</title>
+    <title>Clase en Vivo — Video + Audio</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <style>
@@ -11,44 +11,44 @@
         body { background: #1a1a2e; color: white; min-height: 100vh; padding: 20px; }
         h1 { text-align: center; margin-bottom: 20px; color: #00f5d4; }
         
-        /* PANTALLA DE SELECCIÓN */
-        .pantalla-roles { display: flex; justify-content: center; align-items: center; min-height: 80vh; gap: 30px; flex-wrap: wrap; }
-        .tarjeta-rol { background: #16213e; border-radius: 16px; padding: 40px; width: 280px; text-align: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
-        .tarjeta-rol:hover { transform: scale(1.05); }
-        .tarjeta-rol.profesor { border: 3px solid #ffd700; }
-        .tarjeta-rol.alumno { border: 3px solid #00f5d4; }
+        /* SELECCIÓN DE ROL */
+        .seleccion-rol { display: flex; justify-content: center; align-items: center; min-height: 80vh; gap: 30px; flex-wrap: wrap; }
+        .tarjeta { background: #16213e; border-radius: 16px; padding: 40px; width: 280px; text-align: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+        .tarjeta:hover { transform: scale(1.05); }
+        .tarjeta.profesor { border: 3px solid #ffd700; }
+        .tarjeta.alumno { border: 3px solid #00f5d4; }
         .icono { font-size: 60px; margin-bottom: 20px; }
-        .tarjeta-rol h3 { font-size: 22px; margin-bottom: 10px; }
-        .tarjeta-rol p { color: #aaa; font-size: 14px; }
+        .tarjeta h3 { font-size: 22px; margin-bottom: 10px; }
+        .tarjeta p { color: #aaa; font-size: 14px; }
 
         /* PANTALLA PRINCIPAL */
-        .pantalla-principal { display: none; }
-        .estado-conexion { text-align: center; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; }
-        .estado-verde { background: #004d40; color: #fff; }
-        .estado-rojo { background: #4a0000; color: #ff9999; }
-        .estado-amarillo { background: #5c4a00; color: #fff; }
+        .pantalla-clase { display: none; }
+        .barra-estado { text-align: center; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; }
+        .estado-conectado { background: #004d40; color: #fff; }
+        .estado-esperando { background: #5c4a00; color: #fff; }
+        .estado-desconectado { background: #4a0000; color: #ff9999; }
 
-        .grid-video { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .caja-video { background: #16213e; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .grid-camaras { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .caja-camara { background: #16213e; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .etiqueta { display: inline-block; padding: 6px 16px; border-radius: 20px; font-weight: bold; margin-bottom: 15px; font-size: 14px; }
         .etiqueta-profesor { background: #ffd700; color: #000; }
         .etiqueta-alumno { background: #00f5d4; color: #000; }
         video { width: 100%; border-radius: 8px; background: #000; min-height: 280px; transform: scaleX(-1); margin-bottom: 15px; }
-        #videoRemoto { transform: none; }
+        #videoOtro { transform: none; }
         .sin-video { display: flex; align-items: center; justify-content: center; color: #888; font-size: 16px; height: 280px; }
 
-        .botones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .fila-botones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .btn { padding: 12px 18px; font-size: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
         .btn:hover { transform: scale(1.02); }
         .btn-amarillo { background: #ffd700; color: #000; }
         .btn-verde { background: #00f5d4; color: #000; }
         .btn-azul { background: #2196f3; color: white; }
-        .btn-rojo { background: #e94560; color: white; }
         .btn-gris { background: #555; color: white; }
+        .btn-rojo { background: #e94560; color: white; }
         .btn-salir { position: fixed; top: 15px; right: 15px; background: #e94560; color: white; z-index: 100; }
 
-        .indicador-audio { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; background: #2a2a4a; font-size: 13px; margin-left: 10px; }
-        .audio-activo { background: #004d40; color: #fff; }
+        .indicador { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; background: #2a2a4a; font-size: 13px; margin-left: 10px; }
+        .activo { background: #004d40; color: #fff; }
 
         /* CHAT */
         .caja-chat { background: #16213e; border-radius: 12px; padding: 20px; margin-top: 20px; }
@@ -56,12 +56,11 @@
         .mensaje { margin-bottom: 12px; padding: 10px 14px; border-radius: 18px; max-width: 80%; line-height: 1.4; }
         .mensaje-propio { background: #00f5d4; color: #000; margin-left: auto; border-bottom-right-radius: 4px; }
         .mensaje-otro { background: #2a3f5f; color: white; margin-right: auto; border-bottom-left-radius: 4px; }
-        .mensaje .hora { font-size: 11px; opacity: 0.7; margin-top: 5px; }
         .entrada-chat { display: flex; gap: 10px; }
-        #inputMensaje { flex: 1; padding: 14px; border-radius: 8px; border: none; background: #0f3460; color: white; font-size: 15px; }
+        #entradaMensaje { flex: 1; padding: 14px; border-radius: 8px; border: none; background: #0f3460; color: white; font-size: 15px; }
 
         @media (max-width: 900px) {
-            .grid-video { grid-template-columns: 1fr; }
+            .grid-camaras { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -69,53 +68,53 @@
 
     <button class="btn btn-salir" onclick="salir()">🚪 Salir</button>
 
-    <!-- PANTALLA SELECCIÓN DE ROL -->
-    <div class="pantalla-roles" id="pantallaRoles">
-        <div class="tarjeta-rol profesor" onclick="entrarComo('profesor')">
+    <!-- SELECCIÓN DE ROL -->
+    <div class="seleccion-rol" id="pantallaSeleccion">
+        <div class="tarjeta profesor" onclick="entrar('profesor')">
             <div class="icono">👨‍🏫</div>
             <h3>Profesor</h3>
-            <p>Ver y escuchar alumno, compartir pantalla, chatear</p>
+            <p>Ver y escuchar alumno, compartir pantalla</p>
         </div>
-        <div class="tarjeta-rol alumno" onclick="entrarComo('alumno')">
+        <div class="tarjeta alumno" onclick="entrar('alumno')">
             <div class="icono">👨‍🎓</div>
             <h3>Alumno</h3>
-            <p>Ver y escuchar profesor, recibir clase, chatear</p>
+            <p>Ver y escuchar profesor, recibir clase</p>
         </div>
     </div>
 
-    <!-- PANTALLA CLASE EN VIVO -->
-    <div class="pantalla-principal" id="pantallaPrincipal">
-        <h1>📹🎤 Clase en Vivo — <span id="nombreRol"></span></h1>
+    <!-- PANTALLA DE CLASE -->
+    <div class="pantalla-clase" id="pantallaClase">
+        <h1>📹🎤 Clase en Vivo — <span id="miRolTexto"></span></h1>
         
-        <div class="estado-conexion estado-rojo" id="estadoConexion">
-            🔴 Esperando conexión...
+        <div class="barra-estado estado-esperando" id="barraEstado">
+            ⏳ Esperando conexión...
         </div>
 
-        <div class="grid-video">
-            <!-- TU CÁMARA Y MICRÓFONO -->
-            <div class="caja-video">
+        <div class="grid-camaras">
+            <!-- MI CÁMARA -->
+            <div class="caja-camara">
                 <div style="display:flex;align-items:center;flex-wrap:wrap;margin-bottom:15px;">
-                    <span class="etiqueta" id="etiquetaTu">Tu cámara</span>
-                    <span class="indicador-audio" id="indicadorAudioTu">🎤 Micrófono: ⏳</span>
+                    <span class="etiqueta" id="miEtiqueta">Mi Cámara</span>
+                    <span class="indicador" id="miAudioEstado">🎤 Mic: ⏳</span>
                 </div>
-                <video id="videoLocal" autoplay playsinline muted></video>
-                <div class="botones">
-                    <button class="btn btn-amarillo" onclick="activarCamaraYMic()">📷🎤 Activar Todo</button>
+                <video id="miVideo" autoplay playsinline muted></video>
+                <div class="fila-botones">
+                    <button class="btn btn-amarillo" onclick="iniciarCamaraAudio()">📷🎤 Activar Cámara y Micrófono</button>
                     <button class="btn btn-azul" onclick="compartirPantalla()">🖥️ Compartir Pantalla</button>
                     <button class="btn btn-gris" id="btnSilenciar" onclick="alternarMicrofono()">🔇 Silenciar</button>
                     <button class="btn btn-rojo" onclick="detenerTodo()">🛑 Parar</button>
                 </div>
             </div>
 
-            <!-- CÁMARA Y AUDIO DEL OTRO -->
-            <div class="caja-video">
+            <!-- CÁMARA DEL OTRO -->
+            <div class="caja-camara">
                 <div style="display:flex;align-items:center;flex-wrap:wrap;margin-bottom:15px;">
-                    <span class="etiqueta etiqueta-alumno" id="etiquetaOtro">Cámara del otro</span>
-                    <span class="indicador-audio" id="indicadorAudioOtro">🔊 Audio: ⏳</span>
+                    <span class="etiqueta etiqueta-alumno" id="etiquetaOtro">Cámara del Otro</span>
+                    <span class="indicador" id="audioOtroEstado">🔊 Audio: ⏳</span>
                 </div>
-                <video id="videoRemoto" autoplay playsinline class="sin-video"></video>
-                <div class="botones">
-                    <span id="estadoVideo" style="color:#888; padding:10px;">📹 Esperando conexión de video...</span>
+                <video id="videoOtro" autoplay playsinline class="sin-video"></video>
+                <div class="fila-botones">
+                    <span id="estadoConexionVideo" style="color:#888; padding:10px;">📹 Esperando conexión de video...</span>
                 </div>
             </div>
         </div>
@@ -127,14 +126,14 @@
                 <div style="text-align:center; color:#888; padding:20px;">✅ Conectado. Escribe un mensaje ✍️</div>
             </div>
             <div class="entrada-chat">
-                <input type="text" id="inputMensaje" placeholder="Escribe tu mensaje..." onkeypress="if(event.key === 'Enter') enviarMensaje()">
+                <input type="text" id="entradaMensaje" placeholder="Escribe tu mensaje..." onkeypress="if(event.key === 'Enter') enviarMensaje()">
                 <button class="btn btn-verde" onclick="enviarMensaje()">📤 Enviar</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ===== TU CONFIGURACIÓN DE FIREBASE =====
+        // ===== FIREBASE =====
         const firebaseConfig = {
             apiKey: "AIZaSyCFWxrLP77QblShCdUvjuDbg-X98yfyAo",
             authDomain: "clases-consupervision.firebaseapp.com",
@@ -148,12 +147,13 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // ===== SERVIDORES STUN PARA CONECTAR CÁMARAS Y AUDIO =====
+        // ===== SERVIDORES DE CONEXIÓN =====
         const servidoresICE = {
             iceServers: [
                 { urls: "stun:stun.l.google.com:19302" },
                 { urls: "stun:stun1.l.google.com:19302" },
-                { urls: "stun:stun2.l.google.com:19302" }
+                { urls: "stun:stun2.l.google.com:19302" },
+                { urls: "stun:stun3.l.google.com:19302" }
             ]
         };
 
@@ -168,35 +168,32 @@
         let señalesRef = null;
         let estadoRef = null;
         let yaOfreci = false;
-        let yaRespondi = false;
 
         // ===== ENTRAR COMO ROL =====
-        function entrarComo(rol) {
+        function entrar(rol) {
             miRol = rol;
             miId = rol;
             otroId = rol === 'profesor' ? 'alumno' : 'profesor';
 
-            document.getElementById('pantallaRoles').style.display = 'none';
-            document.getElementById('pantallaPrincipal').style.display = 'block';
-            document.getElementById('nombreRol').textContent = rol === 'profesor' ? '👨‍🏫 Profesor' : '👨‍🎓 Alumno';
+            document.getElementById('pantallaSeleccion').style.display = 'none';
+            document.getElementById('pantallaClase').style.display = 'block';
+            document.getElementById('miRolTexto').textContent = rol === 'profesor' ? '👨‍🏫 Profesor' : '👨‍🎓 Alumno';
 
             // Etiquetas visuales
-            document.getElementById('etiquetaTu').className = 
+            document.getElementById('miEtiqueta').className = 
                 rol === 'profesor' ? 'etiqueta etiqueta-profesor' : 'etiqueta etiqueta-alumno';
-            document.getElementById('etiquetaTu').textContent = 
+            document.getElementById('miEtiqueta').textContent = 
                 rol === 'profesor' ? '👨‍🏫 Mi Cámara' : '👨‍🎓 Mi Cámara';
             document.getElementById('etiquetaOtro').className = 
                 rol === 'profesor' ? 'etiqueta etiqueta-alumno' : 'etiqueta etiqueta-profesor';
             document.getElementById('etiquetaOtro').textContent = 
                 rol === 'profesor' ? '👨‍🎓 Cámara del Alumno' : '👨‍🏫 Cámara del Profesor';
 
-            // Referencias en Firebase — usamos ruta NUEVA para evitar conflictos
-            mensajesRef = db.ref('clase_final/mensajes');
-            señalesRef = db.ref('clase_final/señales');
-            estadoRef = db.ref('clase_final/estado');
-
-            // Limpiar señales viejas al entrar
-            señalesRef.remove();
+            // RUTA NUEVA Y LIMPIA para evitar conflictos con datos viejos
+            const rutaSesion = 'sesion_' + Date.now();
+            mensajesRef = db.ref(rutaSesion + '/mensajes');
+            señalesRef = db.ref(rutaSesion + '/señales');
+            estadoRef = db.ref(rutaSesion + '/estado');
 
             // Anunciar que estoy aquí
             estadoRef.child(miId).set({ conectado: true, tiempo: Date.now() });
@@ -205,52 +202,46 @@
             estadoRef.child(otroId).on('value', (snap) => {
                 const datos = snap.val();
                 if (datos && datos.conectado) {
-                    actualizarEstadoConexion('conectado');
+                    actualizarEstado('conectado');
                 } else {
-                    actualizarEstadoConexion('desconectado');
-                    // Reiniciar banderas si el otro se desconectó
-                    yaOfreci = false;
-                    yaRespondi = false;
+                    actualizarEstado('esperando');
                 }
             });
 
-            // ===== ESCUCHAR SEÑALES DE VIDEO Y AUDIO =====
+            // ===== ESCUCHAR SEÑALES — LÓGICA SIMPLIFICADA =====
             señalesRef.on('value', async (snap) => {
                 const datos = snap.val();
                 if (!datos) return;
 
                 try {
-                    // 1️⃣ RECIBO UNA OFERTA DEL OTRO
-                    if (datos.oferta && !yaRespondi) {
-                        console.log('📥 Recibí oferta de conexión');
-                        crearConexionSiNoHay();
+                    // 1️⃣ RECIBO OFERTA → RESPONDO
+                    if (datos.oferta && !conexion?.remoteDescription) {
+                        console.log('📥 Recibí oferta');
+                        crearConexion();
                         await conexion.setRemoteDescription(new RTCSessionDescription(datos.oferta));
-                        
-                        // Le mando MI RESPUESTA con mi video Y MI AUDIO
-                        const respuesta = await conexion.createAnswer();
+                        const respuesta = await conexion.createAnswer({
+                            offerToReceiveAudio: true,
+                            offerToReceiveVideo: true
+                        });
                         await conexion.setLocalDescription(respuesta);
-                        yaRespondi = true;
-                        
                         señalesRef.update({ respuesta: respuesta });
-                        console.log('📤 Envié respuesta con mi video y audio');
+                        console.log('📤 Envié respuesta');
                     }
 
-                    // 2️⃣ RECIBO LA RESPUESTA A MI OFERTA
-                    if (datos.respuesta && yaOfreci && conexion && !conexion.remoteDescription) {
-                        console.log('📥 Recibí respuesta del otro');
+                    // 2️⃣ RECIBO RESPUESTA → LA APLICO
+                    if (datos.respuesta && conexion?.localDescription?.type === 'offer') {
+                        console.log('📥 Recibí respuesta');
                         await conexion.setRemoteDescription(new RTCSessionDescription(datos.respuesta));
                     }
 
-                    // 3️⃣ RECIBO DIRECCIONES PARA CONECTAR
+                    // 3️⃣ RECIBO DIRECCIONES → LAS AGREGO
                     if (datos.candidato && conexion) {
                         try {
                             await conexion.addIceCandidate(new RTCIceCandidate(datos.candidato));
-                        } catch (e) {
-                            console.log('Candidato ya procesado');
-                        }
+                        } catch (e) {}
                     }
                 } catch (e) {
-                    console.error('Error procesando señal:', e);
+                    console.error('Error señal:', e);
                 }
             });
 
@@ -263,267 +254,213 @@
                 }
             });
 
-            agregarMsgSistema(`✅ ${miRol === 'profesor' ? 'Profesor' : 'Alumno'} se ha conectado — con cámara y micrófono`);
+            agregarMsgSistema(`✅ ${miRol === 'profesor' ? 'Profesor' : 'Alumno'} se ha conectado`);
         }
 
-        function actualizarEstadoConexion(estado) {
-            const caja = document.getElementById('estadoConexion');
+        function actualizarEstado(estado) {
+            const barra = document.getElementById('barraEstado');
             if (estado === 'conectado') {
-                caja.className = 'estado-conexion estado-verde';
-                caja.textContent = `🟢 ${otroId === 'alumno' ? 'Alumno' : 'Profesor'} está conectado — ¡Activa tu cámara y micrófono!`;
+                barra.className = 'barra-estado estado-conectado';
+                barra.textContent = `🟢 ${otroId === 'alumno' ? 'Alumno' : 'Profesor'} está conectado — ¡Activa tu cámara!`;
             } else {
-                caja.className = 'estado-conexion estado-rojo';
-                caja.textContent = `🔴 Esperando que se conecte el ${otroId === 'alumno' ? 'Alumno' : 'Profesor'}...`;
-                document.getElementById('estadoVideo').textContent = '📹 Esperando conexión...';
+                barra.className = 'barra-estado estado-esperando';
+                barra.textContent = `⏳ Esperando que se conecte el ${otroId === 'alumno' ? 'Alumno' : 'Profesor'}...`;
             }
         }
 
-        // ===== CREAR CONEXIÓN WEBRTC COMPLETA =====
-        function crearConexionSiNoHay() {
+        // ===== CREAR CONEXIÓN WEBRTC =====
+        function crearConexion() {
             if (conexion) return;
 
-            console.log('🔌 Creando conexión WebRTC...');
+            console.log('🔌 Creando conexión...');
             conexion = new RTCPeerConnection(servidoresICE);
 
-            // 📹🎤 CUANDO RECIBA VIDEO Y AUDIO DEL OTRO → LO MUESTRO Y ESCUCHO
+            // 📹🎤 RECIBO VIDEO Y AUDIO DEL OTRO → LO MUESTRO
             conexion.ontrack = (evento) => {
-                console.log(`📡 Recibí pista: ${evento.track.kind}`);
+                console.log(`📡 Recibí: ${evento.track.kind}`);
                 
                 if (evento.track.kind === 'video') {
-                    // 📹 VIDEO REMOTO — ARREGLADO: asegurar que se muestre
-                    const videoRemoto = document.getElementById('videoRemoto');
+                    const videoRemoto = document.getElementById('videoOtro');
                     videoRemoto.classList.remove('sin-video');
                     videoRemoto.srcObject = evento.streams[0];
-                    document.getElementById('estadoVideo').textContent = '🟢 ¡Video conectado! Ya se ven mutuamente';
-                    agregarMsgSistema('📹 ¡Cámara del otro participante visible!');
+                    document.getElementById('estadoConexionVideo').textContent = '🟢 ¡Cámara del otro visible!';
+                    agregarMsgSistema('📹 ¡Cámara conectada! Ya se ven mutuamente');
                 }
                 
                 if (evento.track.kind === 'audio') {
-                    // 🎤 AUDIO REMOTO — SE ESCUCHA AUTOMÁTICAMENTE
-                    const audioElement = new Audio();
-                    audioElement.srcObject = evento.streams[0];
-                    audioElement.autoplay = true;
-                    audioElement.controls = false;
-                    audioElement.volume = 1.0;
-                    
-                    // Mostrar indicador de audio activo
-                    document.getElementById('indicadorAudioOtro').className = 'indicador-audio audio-activo';
-                    document.getElementById('indicadorAudioOtro').textContent = '🔊 Audio activo';
-                    
-                    agregarMsgSistema('🎤 ¡Audio bidireccional activo! Ya pueden escucharse');
+                    const audio = new Audio();
+                    audio.srcObject = evento.streams[0];
+                    audio.autoplay = true;
+                    audio.volume = 1.0;
+                    document.getElementById('audioOtroEstado').className = 'indicador activo';
+                    document.getElementById('audioOtroEstado').textContent = '🔊 Audio activo';
+                    agregarMsgSistema('🎤 ¡Audio conectado! Ya pueden escucharse');
                 }
             };
 
-            // 📡 COMPARTIR MI INFORMACIÓN DE CONEXIÓN
+            // 📡 COMPARTIR MI INFORMACIÓN
             conexion.onicecandidate = (evento) => {
                 if (evento.candidate) {
                     señalesRef.child('candidato').set(evento.candidate.toJSON());
                 }
             };
 
-            // 🔄 SEGUIMIENTO DEL ESTADO DE CONEXIÓN
+            // 🔄 SEGUIMIENTO DE ESTADO
             conexion.onconnectionstatechange = () => {
                 const estado = conexion.connectionState;
-                console.log('🔄 Estado de conexión:', estado);
+                console.log('🔄 Estado:', estado);
                 
                 if (estado === 'connected') {
-                    document.getElementById('estadoVideo').textContent = '🟢 ¡Conectado completamente! — Video + Audio';
+                    document.getElementById('estadoConexionVideo').textContent = '🟢 ¡Conectado completamente!';
                 } else if (estado === 'connecting') {
-                    document.getElementById('estadoVideo').textContent = '🟡 Conectando video y audio...';
-                } else if (estado === 'disconnected' || estado === 'failed' || estado === 'closed') {
-                    document.getElementById('estadoVideo').textContent = '🔴 Conexión perdida — intenta de nuevo';
-                    document.getElementById('indicadorAudioOtro').className = 'indicador-audio';
-                    document.getElementById('indicadorAudioOtro').textContent = '🔊 Audio: desconectado';
+                    document.getElementById('estadoConexionVideo').textContent = '🟡 Conectando...';
+                } else if (estado === 'disconnected' || estado === 'failed') {
+                    document.getElementById('estadoConexionVideo').textContent = '🔴 Conexión perdida — refresca y vuelve a entrar';
                 }
             };
 
-            // Si ya tengo mi stream → agrego video Y AUDIO a la conexión
+            // Si ya tengo mi stream → lo agrego
             if (miStream) {
                 miStream.getTracks().forEach(pista => {
-                    console.log(`➕ Agregando mi pista: ${pista.kind}`);
                     conexion.addTrack(pista, miStream);
                 });
             }
         }
 
-        // 📷🎤 ACTIVAR CÁMARA + MICRÓFONO — AMBOS A LA VEZ
-        async function activarCamaraYMic() {
+        // 📷🎤 ACTIVAR CÁMARA + MICRÓFONO
+        async function iniciarCamaraAudio() {
             try {
-                console.log('🎥 Solicitando cámara Y micrófono...');
+                console.log('🎥 Solicitando cámara y micrófono...');
                 
-                // ✅ PEDIMOS VIDEO + AUDIO JUNTOS — AMBOS OBLIGATORIOS
                 miStream = await navigator.mediaDevices.getUserMedia({
-                    video: { 
-                        width: { ideal: 1280, max: 1920 },
-                        height: { ideal: 720, max: 1080 },
-                        facingMode: "user"
-                    },
+                    video: { width: 1280, height: 720 },
                     audio: {
-                        echoCancellation: true,      // ✅ Cancelar eco — muy importante en llamadas
-                        noiseSuppression: true,      // ✅ Reducir ruido de fondo
-                        autoGainControl: true,       // ✅ Control automático de volumen
-                        sampleRate: 44100,
-                        channelCount: 1
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
                     }
                 });
 
                 // Mostrar mi cámara
-                document.getElementById('videoLocal').srcObject = miStream;
+                document.getElementById('miVideo').srcObject = miStream;
+                document.getElementById('miAudioEstado').className = 'indicador activo';
+                document.getElementById('miAudioEstado').textContent = '🎤 Mic: activo';
                 
-                // ✅ ACTIVAR INDICADOR DE MI MICRÓFONO
-                document.getElementById('indicadorAudioTu').className = 'indicador-audio audio-activo';
-                document.getElementById('indicadorAudioTu').textContent = '🎤 Mic: activo';
-                
-                agregarMsgSistema('📷🎤 Cámara y micrófono activados — ¡Ambos funcionando!');
+                agregarMsgSistema('📷🎤 Cámara y micrófono activados');
 
-                // Crear conexión y agregar MI VIDEO + MI AUDIO
-                crearConexionSiNoHay();
+                // Crear conexión y agregar mi video + audio
+                crearConexion();
                 miStream.getTracks().forEach(pista => {
                     conexion.addTrack(pista, miStream);
                 });
 
-                // ⚡ LÓGICA DE CUÁNDO INICIAR LA CONEXIÓN:
-                // El que llega SEGUNDO envía la oferta
+                // ⚡ LÓGICA CLAVE: El que llega SEGUNDO INICIA la conexión
                 estadoRef.child(otroId).once('value', async (snap) => {
-                    const otroExiste = snap.exists() && snap.val()?.conectado;
+                    const otroConectado = snap.exists() && snap.val()?.conectado;
                     
-                    // Si soy el ALUMNO O el otro ya está conectado → YO INICIO la oferta
-                    if ((miId === 'alumno' || otroExiste) && !yaOfreci) {
-                        await crearOfertaConexion();
+                    // Si soy ALUMNO o el otro ya está conectado → YO INICIO
+                    if ((miId === 'alumno' || otroConectado) && !yaOfreci) {
+                        await crearYEnviarOferta();
                     }
                 });
 
             } catch (e) {
-                console.error('❌ Error al acceder a cámara/micrófono:', e);
-                alert('❌ No se pudo acceder a la cámara o micrófono:\n' + e.message + '\n\n⚠️ Asegúrate de dar PERMISO a AMBOS: cámara Y micrófono cuando el navegador lo pida.');
+                console.error('Error cámara/mic:', e);
+                alert('❌ Error: ' + e.message + '\n⚠️ Da permiso a CÁMARA y MICRÓFONO cuando te lo pida.');
             }
         }
 
-        // 🔇 ALTERNAR MICRÓFONO — SILENCIAR / ACTIVAR
+        // 📤 ENVIAR OFERTA DE CONEXIÓN
+        async function crearYEnviarOferta() {
+            if (yaOfreci) return;
+            yaOfreci = true;
+
+            console.log('📤 Enviando oferta...');
+            crearConexion();
+            const oferta = await conexion.createOffer({
+                offerToReceiveAudio: true,
+                offerToReceiveVideo: true
+            });
+            await conexion.setLocalDescription(oferta);
+            await señalesRef.child('oferta').set(oferta.toJSON());
+            document.getElementById('estadoConexionVideo').textContent = '📤 Enviando solicitud de conexión...';
+        }
+
+        // 🔇 SILENCIAR / ACTIVAR MICRÓFONO
         function alternarMicrofono() {
             if (!miStream) return;
-            
             microfonoSilenciado = !microfonoSilenciado;
             const pistaAudio = miStream.getAudioTracks()[0];
-            
-            if (pistaAudio) {
-                pistaAudio.enabled = !microfonoSilenciado;
-            }
+            if (pistaAudio) pistaAudio.enabled = !microfonoSilenciado;
             
             const btn = document.getElementById('btnSilenciar');
-            const indicador = document.getElementById('indicadorAudioTu');
+            const indicador = document.getElementById('miAudioEstado');
             
             if (microfonoSilenciado) {
                 btn.textContent = '🔊 Activar Mic';
                 btn.className = 'btn btn-verde';
                 indicador.textContent = '🎤 Mic: silenciado';
-                indicador.className = 'indicador-audio';
+                indicador.className = 'indicador';
                 agregarMsgSistema('🔇 Micrófono silenciado');
             } else {
                 btn.textContent = '🔇 Silenciar';
                 btn.className = 'btn btn-gris';
                 indicador.textContent = '🎤 Mic: activo';
-                indicador.className = 'indicador-audio audio-activo';
+                indicador.className = 'indicador activo';
                 agregarMsgSistema('🔊 Micrófono activado');
             }
-        }
-
-        // 📤 ENVIAR OFERTA CON VIDEO + AUDIO
-        async function crearOfertaConexion() {
-            if (yaOfreci) return;
-            yaOfreci = true;
-
-            console.log('📤 Enviando oferta de conexión (Video + Audio)...');
-            crearConexionSiNoHay();
-            const oferta = await conexion.createOffer({
-                offerToReceiveAudio: true,   // ✅ SOLICITAR RECIBIR AUDIO DEL OTRO
-                offerToReceiveVideo: true    // ✅ SOLICITAR RECIBIR VIDEO DEL OTRO
-            });
-            await conexion.setLocalDescription(oferta);
-            
-            await señalesRef.child('oferta').set(oferta.toJSON());
-            document.getElementById('estadoVideo').textContent = '📤 Enviando solicitud completa...';
-            console.log('✅ Oferta enviada con video y audio');
         }
 
         // 🖥️ COMPARTIR PANTALLA
         async function compartirPantalla() {
             try {
-                if (compartiendoPantalla) {
-                    detenerPantallaCompartida();
-                    return;
-                }
-
-                const pantalla = await navigator.mediaDevices.getDisplayMedia({
-                    video: { cursor: 'always' },
-                    audio: true
-                });
-
-                document.getElementById('videoLocal').srcObject = pantalla;
+                if (compartiendoPantalla) { detenerPantalla(); return; }
+                const pantalla = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                document.getElementById('miVideo').srcObject = pantalla;
                 compartiendoPantalla = true;
 
-                // Reemplazar SOLO el video — el audio sigue siendo el micrófono
                 if (conexion) {
-                    const emisorVideo = conexion.getSenders().find(s => s.track?.kind === 'video');
-                    if (emisorVideo) {
-                        await emisorVideo.replaceTrack(pantalla.getVideoTracks()[0]);
-                    }
+                    const emisor = conexion.getSenders().find(s => s.track?.kind === 'video');
+                    if (emisor) await emisor.replaceTrack(pantalla.getVideoTracks()[0]);
                 }
 
-                agregarMsgSistema('🖥️ Pantalla compartida — el alumno la ve y te escucha');
-
-                pantalla.getVideoTracks()[0].onended = () => {
-                    detenerPantallaCompartida();
-                };
-
-            } catch (e) {
-                alert('❌ No se pudo compartir pantalla: ' + e.message);
-            }
+                agregarMsgSistema('🖥️ Pantalla compartida');
+                pantalla.getVideoTracks()[0].onended = detenerPantalla;
+            } catch (e) { alert('❌ No se pudo compartir pantalla: ' + e.message); }
         }
 
-        async function detenerPantallaCompartida() {
+        async function detenerPantalla() {
             compartiendoPantalla = false;
             if (miStream) {
-                document.getElementById('videoLocal').srcObject = miStream;
+                document.getElementById('miVideo').srcObject = miStream;
                 if (conexion) {
-                    const emisorVideo = conexion.getSenders().find(s => s.track?.kind === 'video');
-                    if (emisorVideo) {
-                        await emisorVideo.replaceTrack(miStream.getVideoTracks()[0]);
-                    }
+                    const emisor = conexion.getSenders().find(s => s.track?.kind === 'video');
+                    if (emisor) await emisor.replaceTrack(miStream.getVideoTracks()[0]);
                 }
             }
-            agregarMsgSistema('🖥️ Pantalla dejada de compartir — volviendo a cámara');
+            agregarMsgSistema('🖥️ Pantalla dejada de compartir');
         }
 
         function detenerTodo() {
             if (miStream) miStream.getTracks().forEach(t => t.stop());
             miStream = null;
-            document.getElementById('videoLocal').srcObject = null;
-            document.getElementById('videoRemoto').srcObject = null;
-            document.getElementById('videoRemoto').classList.add('sin-video');
+            document.getElementById('miVideo').srcObject = null;
+            document.getElementById('videoOtro').srcObject = null;
+            document.getElementById('videoOtro').classList.add('sin-video');
             if (conexion) conexion.close();
             conexion = null;
             yaOfreci = false;
-            yaRespondi = false;
             microfonoSilenciado = false;
-            señalesRef?.remove();
-            
-            // Restaurar indicadores
-            document.getElementById('indicadorAudioTu').className = 'indicador-audio';
-            document.getElementById('indicadorAudioTu').textContent = '🎤 Micrófono: ⏳';
-            document.getElementById('indicadorAudioOtro').className = 'indicador-audio';
-            document.getElementById('indicadorAudioOtro').textContent = '🔊 Audio: ⏳';
-            
-            agregarMsgSistema('🛑 Cámara, micrófono y video detenidos');
+            agregarMsgSistema('🛑 Todo detenido');
         }
 
         // 💬 CHAT
         function enviarMensaje() {
-            const texto = document.getElementById('inputMensaje').value.trim();
+            const texto = document.getElementById('entradaMensaje').value.trim();
             if (!texto) return;
             const hora = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
             mensajesRef.push({ de: miId, texto: texto, hora: hora, visto: false });
-            document.getElementById('inputMensaje').value = '';
+            document.getElementById('entradaMensaje').value = '';
         }
 
         function mostrarMensaje(msg) {
@@ -531,7 +468,7 @@
             const esMio = msg.de === miId;
             const div = document.createElement('div');
             div.className = `mensaje ${esMio ? 'mensaje-propio' : 'mensaje-otro'}`;
-            div.innerHTML = `<strong>${msg.de === 'profesor' ? '👨‍🏫 Profesor' : '👨‍🎓 Alumno'}:</strong> ${msg.texto}<div class="hora">${msg.hora}</div>`;
+            div.innerHTML = `<strong>${msg.de === 'profesor' ? '👨‍🏫 Profesor' : '👨‍🎓 Alumno'}:</strong> ${msg.texto}<div style="font-size:11px;opacity:0.7;margin-top:5px;">${msg.hora}</div>`;
             caja.appendChild(div);
             caja.scrollTop = caja.scrollHeight;
         }
@@ -549,7 +486,7 @@
         }
 
         function salir() {
-            if (confirm('¿Seguro quieres salir de la clase?')) {
+            if (confirm('¿Seguro quieres salir?')) {
                 detenerTodo();
                 estadoRef?.child(miId)?.set({ conectado: false });
                 window.location.reload();
