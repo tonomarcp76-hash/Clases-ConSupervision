@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clases con Supervisión - Comunicación Completa</title>
+    <title>Clases con Supervisión — Cámaras Mutuas + Chat + Pantalla</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <style>
@@ -11,7 +11,7 @@
         body { background: #1a1a2e; color: white; min-height: 100vh; padding: 20px; }
         h1 { text-align: center; margin-bottom: 20px; color: #00f5d4; }
         h2 { font-size: 16px; margin-bottom: 10px; color: #00f5d4; }
-        
+
         /* PANTALLA DE SELECCIÓN */
         .pantalla-roles { display: flex; justify-content: center; align-items: center; min-height: 80vh; gap: 30px; flex-wrap: wrap; }
         .tarjeta-rol { background: #16213e; border-radius: 16px; padding: 40px; width: 280px; text-align: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
@@ -24,7 +24,7 @@
 
         /* PANTALLA PRINCIPAL */
         .pantalla-principal { display: none; }
-        .indicador-conexion { text-align: center; padding: 10px; border-radius: 8px; margin-bottom: 15px; background: #2a2a4a; }
+        .indicador-conexion { text-align: center; padding: 12px; border-radius: 8px; margin-bottom: 20px; }
         .conectado { background: #004d40; color: #fff; }
         .desconectado { background: #4a0000; color: #ff9999; }
         .punto { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
@@ -36,8 +36,9 @@
         .etiqueta { display: inline-block; padding: 6px 16px; border-radius: 20px; font-weight: bold; margin-bottom: 15px; font-size: 14px; }
         .etiqueta-profesor { background: #ffd700; color: #000; }
         .etiqueta-alumno { background: #00f5d4; color: #000; }
-        video { width: 100%; border-radius: 8px; background: #000; min-height: 240px; transform: scaleX(-1); margin-bottom: 15px; }
-        .video-remoto { transform: none; }
+        video { width: 100%; border-radius: 8px; background: #000; min-height: 280px; transform: scaleX(-1); margin-bottom: 15px; }
+        #videoRemoto { transform: none; background: #0a0a1a; }
+        .sin-video { display: flex; align-items: center; justify-content: center; color: #666; font-size: 16px; height: 280px; }
 
         .botones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .btn { padding: 12px 18px; font-size: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
@@ -46,7 +47,6 @@
         .btn-verde { background: #00f5d4; color: #000; }
         .btn-rojo { background: #e94560; color: white; }
         .btn-azul { background: #2196f3; color: white; }
-        .btn-gris { background: #555; color: white; }
         .btn-salir { position: fixed; top: 15px; right: 15px; background: #e94560; color: white; z-index: 100; }
 
         /* CHAT */
@@ -73,7 +73,7 @@
         <div class="tarjeta-rol profesor" onclick="entrarComo('profesor')">
             <div class="icono">👨‍🏫</div>
             <h3>Profesor</h3>
-            <p>Compartir pantalla, ver alumno, chatear</p>
+            <p>Ver alumno, compartir pantalla, chatear</p>
         </div>
         <div class="tarjeta-rol alumno" onclick="entrarComo('alumno')">
             <div class="icono">👨‍🎓</div>
@@ -88,7 +88,7 @@
         
         <div class="indicador-conexion desconectado" id="indicadorConexion">
             <span class="punto rojo"></span>
-            <span id="textoConexion">Esperando que se conecte el otro participante...</span>
+            <span id="textoConexion">⏳ Esperando que se conecte el otro participante...</span>
         </div>
 
         <div class="grid-principal">
@@ -97,8 +97,8 @@
                 <span class="etiqueta" id="etiquetaTuCamara">Tu cámara</span>
                 <video id="videoLocal" autoplay playsinline muted></video>
                 <div class="botones">
-                    <button class="btn btn-amarillo" onclick="iniciarCamara()">📷 Mi Cámara</button>
-                    <button class="btn btn-azul" onclick="compartirPantalla()">🖥️ Compartir Pantalla</button>
+                    <button class="btn btn-amarillo" onclick="iniciarCamara()">📷 Activar Cámara</button>
+                    <button class="btn btn-azul" id="btnPantalla" onclick="compartirPantalla()">🖥️ Compartir Pantalla</button>
                     <button class="btn btn-rojo" onclick="detenerTodo()">🛑 Parar</button>
                 </div>
             </div>
@@ -106,18 +106,18 @@
             <!-- CÁMARA DEL OTRO -->
             <div class="caja-video">
                 <span class="etiqueta etiqueta-alumno" id="etiquetaOtro">Otro participante</span>
-                <video id="videoRemoto" autoplay playsinline class="video-remoto"></video>
+                <video id="videoRemoto" autoplay playsinline class="sin-video"></video>
                 <div class="botones">
-                    <span style="color:#888; padding:10px;">📹 Esperando conexión...</span>
+                    <span id="estadoVideoRemoto" style="color:#888; padding:10px;">📹 Esperando conexión de video...</span>
                 </div>
             </div>
         </div>
 
         <!-- CHAT -->
         <div class="caja-chat">
-            <h2>💬 Comunicación con el Alumno</h2>
+            <h2>💬 Comunicación en tiempo real</h2>
             <div class="mensajes" id="cajaMensajes">
-                <div style="text-align:center; color:#888; padding:20px;">Escribe un mensaje y se enviará al instante al otro participante ✍️</div>
+                <div style="text-align:center; color:#888; padding:20px;">✅ Conectado. Escribe un mensaje y llegará al instante ✍️</div>
             </div>
             <div class="entrada-chat">
                 <input type="text" id="inputMensaje" placeholder="Escribe tu mensaje aquí..." onkeypress="if(event.key === 'Enter') enviarMensaje()">
@@ -127,7 +127,7 @@
     </div>
 
     <script>
-        // ===== CONFIGURACIÓN DE FIREBASE =====
+        // ===== TU CONFIGURACIÓN DE FIREBASE =====
         const firebaseConfig = {
             apiKey: "AIZaSyCFWxrLP77QblShCdUvjuDbg-X98yfyAo",
             authDomain: "clases-consupervision.firebaseapp.com",
@@ -140,55 +140,99 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        
+
+        // ===== CONFIGURACIÓN WEBRTC =====
+        // Servidores públicos para conectar las cámaras (gratuitos)
+        const servidoresSTUN = {
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302" },
+                { urls: "stun:stun1.l.google.com:19302" }
+            ]
+        };
+
         let rolActual = null;
+        let miId = null;
+        let otroId = null;
+        let conexionWebRTC = null;
         let streamLocal = null;
         let compartiendoPantalla = false;
-        let miId = null;
-        let otroConectado = false;
         let mensajesRef = null;
+        let señalesRef = null;
         let estadoRef = null;
 
         // ===== ENTRAR COMO ROL =====
         function entrarComo(rol) {
             rolActual = rol;
-            miId = rol; // "profesor" o "alumno"
-            
+            miId = rol;
+            otroId = rol === 'profesor' ? 'alumno' : 'profesor';
+
             document.getElementById('pantallaRoles').style.display = 'none';
             document.getElementById('pantallaPrincipal').style.display = 'block';
             document.getElementById('nombreRol').textContent = rol === 'profesor' ? '👨‍🏫 Profesor' : '👨‍🎓 Alumno';
-            
-            // Actualizar etiquetas
+
+            // Actualizar etiquetas visuales
             document.getElementById('etiquetaTuCamara').className = 
                 rol === 'profesor' ? 'etiqueta etiqueta-profesor' : 'etiqueta etiqueta-alumno';
             document.getElementById('etiquetaTuCamara').textContent = 
-                rol === 'profesor' ? '👨‍🏫 Tu cámara (Profesor)' : '👨‍🎓 Tu cámara (Alumno)';
+                rol === 'profesor' ? '👨‍🏫 Mi Cámara (Profesor)' : '👨‍🎓 Mi Cámara (Alumno)';
             document.getElementById('etiquetaOtro').className = 
                 rol === 'profesor' ? 'etiqueta etiqueta-alumno' : 'etiqueta etiqueta-profesor';
             document.getElementById('etiquetaOtro').textContent = 
-                rol === 'profesor' ? '👨‍🎓 Alumno' : '👨‍🏫 Profesor';
+                rol === 'profesor' ? '👨‍🎓 Cámara del Alumno' : '👨‍🏫 Cámara del Profesor';
 
             // Referencias en Firebase
             mensajesRef = db.ref('clase/mensajes');
+            señalesRef = db.ref('clase/señales/' + miId);
             estadoRef = db.ref('clase/estado');
 
             // Anunciar que estoy conectado
-            estadoRef.child(miId).set({ conectado: true, ultimaConexion: firebase.database.ServerValue.TIMESTAMP });
-            
-            // Escuchar estado del otro
-            const otroRol = rol === 'profesor' ? 'alumno' : 'profesor';
-            estadoRef.child(otroRol).on('value', (snap) => {
+            estadoRef.child(miId).set({ conectado: true, ultimoAcceso: firebase.database.ServerValue.TIMESTAMP });
+
+            // Escuchar estado del otro participante
+            estadoRef.child(otroId).on('value', (snap) => {
                 const datos = snap.val();
                 if (datos && datos.conectado) {
-                    otroConectado = true;
-                    actualizarIndicadorConexion(true, otroRol);
+                    actualizarIndicadorConexion(true);
+                    // Si soy el segundo en conectarme, INICIO la conexión de video
+                    if (miId === 'alumno') {
+                        esperarYConectar();
+                    }
                 } else {
-                    otroConectado = false;
-                    actualizarIndicadorConexion(false, otroRol);
+                    actualizarIndicadorConexion(false);
                 }
             });
 
-            // Escuchar mensajes
+            // Escuchar señales de video del otro participante
+            db.ref('clase/señales/' + otroId).on('value', async (snap) => {
+                const señal = snap.val();
+                if (!señal) return;
+
+                try {
+                    // 1️⃣ Recibo una oferta de conexión
+                    if (señal.oferta && !conexionWebRTC?.remoteDescription) {
+                        crearConexionSiNoExiste();
+                        await conexionWebRTC.setRemoteDescription(new RTCSessionDescription(señal.oferta));
+                        const respuesta = await conexionWebRTC.createAnswer();
+                        await conexionWebRTC.setLocalDescription(respuesta);
+                        señalesRef.set({ respuesta: respuesta });
+                    }
+
+                    // 2️⃣ Recibo una respuesta a mi oferta
+                    if (señal.respuesta && conexionWebRTC?.localDescription?.type === 'offer') {
+                        await conexionWebRTC.setRemoteDescription(new RTCSessionDescription(señal.respuesta));
+                    }
+
+                    // 3️⃣ Recibo candidatos de conexión (direcciones para encontrarse)
+                    if (señal.candidato) {
+                        crearConexionSiNoExiste();
+                        await conexionWebRTC.addIceCandidate(new RTCIceCandidate(señal.candidato));
+                    }
+                } catch (error) {
+                    console.log('Error procesando señal:', error);
+                }
+            });
+
+            // Escuchar mensajes del chat
             mensajesRef.on('child_added', (snap) => {
                 const msg = snap.val();
                 if (!msg.mostrado) {
@@ -197,48 +241,113 @@
                 }
             });
 
-            // Escuchar señales de video (WebRTC simplificado por Firebase)
-            db.ref('clase/videoSenas').on('value', (snap) => {
-                // Versión simplificada: cada uno activa su cámara y el sistema lo coordina
-            });
-
-            agregarMensajeSistema(`✅ ${rol === 'profesor' ? 'Profesor' : 'Alumno'} se ha conectado`);
+            agregarMensajeSistema(`✅ ${rol === 'profesor' ? 'Profesor' : 'Alumno'} se ha conectado a la clase`);
         }
 
-        function actualizarIndicadorConexion(conectado, nombreOtro) {
+        function actualizarIndicadorConexion(conectado) {
             const indicador = document.getElementById('indicadorConexion');
             const punto = indicador.querySelector('.punto');
             const texto = document.getElementById('textoConexion');
-            
+
             if (conectado) {
                 indicador.className = 'indicador-conexion conectado';
                 punto.className = 'punto verde';
-                texto.textContent = `✅ ${nombreOtro === 'alumno' ? 'Alumno' : 'Profesor'} está conectado — ¡Comunicación activa!`;
+                texto.textContent = `✅ ${otroId === 'alumno' ? 'Alumno' : 'Profesor'} está conectado — ¡Comunicación activa!`;
             } else {
                 indicador.className = 'indicador-conexion desconectado';
                 punto.className = 'punto rojo';
-                texto.textContent = `⏳ Esperando que se conecte el ${nombreOtro === 'alumno' ? 'Alumno' : 'Profesor'}...`;
+                texto.textContent = `⏳ Esperando que se conecte el ${otroId === 'alumno' ? 'Alumno' : 'Profesor'}...`;
+                document.getElementById('estadoVideoRemoto').textContent = '📹 Esperando conexión...';
             }
         }
 
-        // ===== ACTIVAR CÁMARA =====
+        // ===== CREAR CONEXIÓN WEBRTC =====
+        function crearConexionSiNoExiste() {
+            if (conexionWebRTC) return;
+
+            // Crear conexión directa entre las dos computadoras
+            conexionWebRTC = new RTCPeerConnection(servidoresSTUN);
+
+            // Cuando el otro me envía su video → lo muestro
+            conexionWebRTC.ontrack = (evento) => {
+                const videoRemoto = document.getElementById('videoRemoto');
+                videoRemoto.classList.remove('sin-video');
+                videoRemoto.srcObject = evento.streams[0];
+                document.getElementById('estadoVideoRemoto').textContent = '✅ ¡Video conectado!';
+                agregarMensajeSistema('📹 ¡Conexión de video establecida! Ya se ven mutuamente');
+            };
+
+            // Cuando tengo información de conexión → la comparto con el otro
+            conexionWebRTC.onicecandidate = (evento) => {
+                if (evento.candidate) {
+                    db.ref('clase/señales/' + miId + '/candidato').set(evento.candidate.toJSON());
+                }
+            };
+
+            // Cuando mi estado de conexión cambia
+            conexionWebRTC.onconnectionstatechange = () => {
+                const estado = conexionWebRTC.connectionState;
+                if (estado === 'connected') {
+                    document.getElementById('estadoVideoRemoto').textContent = '🟢 Conectado y viéndose';
+                } else if (estado === 'disconnected' || estado === 'failed') {
+                    document.getElementById('estadoVideoRemoto').textContent = '❌ Conexión perdida';
+                }
+            };
+
+            // Si ya tengo mi cámara activa → la agrego a la conexión
+            if (streamLocal) {
+                streamLocal.getTracks().forEach(pista => {
+                    conexionWebRTC.addTrack(pista, streamLocal);
+                });
+            }
+        }
+
+        // INICIAR conexión desde el Profesor hacia el Alumno
+        async function iniciarConexionVideo() {
+            crearConexionSiNoExiste();
+            const oferta = await conexionWebRTC.createOffer();
+            await conexionWebRTC.setLocalDescription(oferta);
+            await db.ref('clase/señales/' + miId + '/oferta').set(oferta.toJSON());
+            document.getElementById('estadoVideoRemoto').textContent = '📤 Enviando solicitud de video...';
+        }
+
+        function esperarYConectar() {
+            setTimeout(() => {
+                if (!conexionWebRTC) {
+                    iniciarConexionVideo();
+                }
+            }, 1000);
+        }
+
+        // ===== ACTIVAR MI CÁMARA =====
         async function iniciarCamara() {
             try {
-                streamLocal = await navigator.mediaDevices.getUserMedia({ 
-                    video: { width: 1280, height: 720 }, 
-                    audio: true 
+                streamLocal = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 1280, height: 720, facingMode: "user" },
+                    audio: true
                 });
+
+                // Mostrar mi cámara
                 document.getElementById('videoLocal').srcObject = streamLocal;
-                agregarMensajeSistema('📷 Cámara activada');
-                
-                // Compartir mi stream por Firebase (señalización simplificada)
-                db.ref('clase/stream/' + miId).set({ activo: true, tiempo: Date.now() });
-                
-                // Simular que el otro recibe el video — en versión completa usar WebRTC
-                mostrarVideoRemotoSimulado();
-                
-            } catch (e) {
-                alert('❌ No se pudo acceder a la cámara/micrófono: ' + e.message);
+                agregarMensajeSistema('📷 Cámara y micrófono activados');
+
+                // Agregar mi video a la conexión para que el otro me vea
+                if (conexionWebRTC) {
+                    streamLocal.getTracks().forEach(pista => {
+                        conexionWebRTC.addTrack(pista, streamLocal);
+                    });
+                }
+
+                // Si soy el PRIMERO en entrar → espero a que el otro se conecte
+                // Si ya hay alguien conectado → YO INICIO la conexión
+                estadoRef.child(otroId).once('value', async (snap) => {
+                    if (snap.exists() && snap.val()?.conectado) {
+                        iniciarConexionVideo();
+                    }
+                });
+
+            } catch (error) {
+                alert('❌ No se pudo acceder a la cámara/micrófono: ' + error.message + '\n\n⚠️ Asegúrate de dar permiso cuando el navegador lo pida.');
             }
         }
 
@@ -249,74 +358,97 @@
                     detenerPantallaCompartida();
                     return;
                 }
-                
+
                 const pantalla = await navigator.mediaDevices.getDisplayMedia({
                     video: { cursor: 'always' },
                     audio: true
                 });
-                
+
+                // Reemplazar mi cámara por la pantalla
                 document.getElementById('videoLocal').srcObject = pantalla;
                 compartiendoPantalla = true;
-                agregarMensajeSistema('🖥️ Pantalla compartida con el alumno');
-                
+
+                // Reemplazar el video en la conexión para que el otro vea mi pantalla
+                if (conexionWebRTC && streamLocal) {
+                    const pistaPantalla = pantalla.getVideoTracks()[0];
+                    const emisor = conexionWebRTC.getSenders().find(s => s.track?.kind === 'video');
+                    if (emisor) {
+                        await emisor.replaceTrack(pistaPantalla);
+                    }
+                }
+
+                agregarMensajeSistema('🖥️ Pantalla compartida — ¡El alumno la está viendo!');
+
+                // Cuando se deja de compartir
                 pantalla.getVideoTracks()[0].onended = () => {
                     detenerPantallaCompartida();
                 };
-                
-            } catch (e) {
-                alert('❌ No se pudo compartir la pantalla: ' + e.message);
+
+            } catch (error) {
+                alert('❌ No se pudo compartir la pantalla: ' + error.message);
             }
         }
 
-        function detenerPantallaCompartida() {
+        async function detenerPantallaCompartida() {
             compartiendoPantalla = false;
+
+            // Volver a mostrar mi cámara
             if (streamLocal) {
                 document.getElementById('videoLocal').srcObject = streamLocal;
-            }
-            agregarMensajeSistema('🖥️ Pantalla dejada de compartir');
-        }
 
-        function mostrarVideoRemotoSimulado() {
-            // En versión completa aquí va WebRTC — por ahora indicamos que está listo
-            setTimeout(() => {
-                const videoRemoto = document.getElementById('videoRemoto');
-                videoRemoto.style.background = '#223';
-                agregarMensajeSistema('📹 Conexión de video establecida — ¡ya pueden verse!');
-            }, 1500);
+                // Restaurar mi cámara en la conexión
+                if (conexionWebRTC) {
+                    const pistaCamara = streamLocal.getVideoTracks()[0];
+                    const emisor = conexionWebRTC.getSenders().find(s => s.track?.kind === 'video');
+                    if (emisor && pistaCamara) {
+                        await emisor.replaceTrack(pistaCamara);
+                    }
+                }
+            }
+
+            agregarMensajeSistema('🖥️ Pantalla dejada de compartir — volviendo a cámara');
         }
 
         function detenerTodo() {
             if (streamLocal) {
-                streamLocal.getTracks().forEach(t => t.stop());
+                streamLocal.getTracks().forEach(pista => pista.stop());
                 streamLocal = null;
             }
             document.getElementById('videoLocal').srcObject = null;
-            document.getElementById('videoRemoto').style.background = '#000';
+            document.getElementById('videoRemoto').srcObject = null;
+            document.getElementById('videoRemoto').classList.add('sin-video');
+
+            if (conexionWebRTC) {
+                conexionWebRTC.close();
+                conexionWebRTC = null;
+            }
+
             compartiendoPantalla = false;
-            agregarMensajeSistema('🛑 Cámara y audio detenidos');
+            agregarMensajeSistema('🛑 Cámara, audio y video detenidos');
+            document.getElementById('estadoVideoRemoto').textContent = '📹 Esperando conexión...';
         }
 
-        // ===== ENVIAR MENSAJE =====
+        // ===== CHAT EN TIEMPO REAL =====
         function enviarMensaje() {
             const texto = document.getElementById('inputMensaje').value.trim();
             if (!texto) return;
-            
+
             const hora = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-            
+
             mensajesRef.push({
                 de: miId,
                 texto: texto,
                 hora: hora,
                 mostrado: false
             });
-            
+
             document.getElementById('inputMensaje').value = '';
         }
 
         function mostrarMensaje(msg) {
             const caja = document.getElementById('cajaMensajes');
             const esMio = msg.de === miId;
-            
+
             const div = document.createElement('div');
             div.className = `mensaje ${esMio ? 'mensaje-propio' : 'mensaje-otro'}`;
             div.innerHTML = `
@@ -343,6 +475,7 @@
             if (confirm('¿Seguro quieres salir de la clase?')) {
                 detenerTodo();
                 if (estadoRef && miId) estadoRef.child(miId).set({ conectado: false });
+                if (señalesRef) señalesRef.remove();
                 window.location.reload();
             }
         }
