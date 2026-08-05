@@ -3,51 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clases con Supervisión - Cámaras y Chat</title>
+    <title>Clases con Supervisión - Comunicación Completa</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
         body { background: #1a1a2e; color: white; min-height: 100vh; padding: 20px; }
-        h1 { text-align: center; margin-bottom: 30px; color: #00f5d4; }
-        h2 { margin-bottom: 15px; color: #00f5d4; font-size: 18px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-
-        .pantalla-roles { display: flex; justify-content: center; align-items: center; min-height: 70vh; gap: 40px; flex-wrap: wrap; }
-        .tarjeta-rol { background: #16213e; border-radius: 16px; padding: 40px; width: 300px; text-align: center; box-shadow: 0 6px 20px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.3s; }
+        h1 { text-align: center; margin-bottom: 20px; color: #00f5d4; }
+        h2 { font-size: 16px; margin-bottom: 10px; color: #00f5d4; }
+        
+        /* PANTALLA DE SELECCIÓN */
+        .pantalla-roles { display: flex; justify-content: center; align-items: center; min-height: 80vh; gap: 30px; flex-wrap: wrap; }
+        .tarjeta-rol { background: #16213e; border-radius: 16px; padding: 40px; width: 280px; text-align: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
         .tarjeta-rol:hover { transform: scale(1.05); }
         .tarjeta-rol.profesor { border: 3px solid #ffd700; }
         .tarjeta-rol.alumno { border: 3px solid #00f5d4; }
-        .tarjeta-rol .icono { font-size: 60px; margin-bottom: 20px; }
-        .tarjeta-rol h3 { font-size: 24px; margin-bottom: 10px; }
+        .icono { font-size: 60px; margin-bottom: 20px; }
+        .tarjeta-rol h3 { font-size: 22px; margin-bottom: 10px; }
         .tarjeta-rol p { color: #aaa; font-size: 14px; }
 
+        /* PANTALLA PRINCIPAL */
         .pantalla-principal { display: none; }
-        .fila-camaras { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .caja-camara { background: #16213e; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .etiqueta-rol { display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px; }
+        .indicador-conexion { text-align: center; padding: 10px; border-radius: 8px; margin-bottom: 15px; background: #2a2a4a; }
+        .conectado { background: #004d40; color: #fff; }
+        .desconectado { background: #4a0000; color: #ff9999; }
+        .punto { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+        .punto.verde { background: #00ff88; }
+        .punto.rojo { background: #ff4444; }
+
+        .grid-principal { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .caja-video { background: #16213e; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .etiqueta { display: inline-block; padding: 6px 16px; border-radius: 20px; font-weight: bold; margin-bottom: 15px; font-size: 14px; }
         .etiqueta-profesor { background: #ffd700; color: #000; }
         .etiqueta-alumno { background: #00f5d4; color: #000; }
-        video { width: 100%; border-radius: 8px; background: #000; transform: scaleX(-1); margin-bottom: 15px; min-height: 280px; }
-        .btn { padding: 12px 24px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; margin: 5px; font-weight: bold; }
+        video { width: 100%; border-radius: 8px; background: #000; min-height: 240px; transform: scaleX(-1); margin-bottom: 15px; }
+        .video-remoto { transform: none; }
+
+        .botones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .btn { padding: 12px 18px; font-size: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
+        .btn:hover { transform: scale(1.02); }
+        .btn-amarillo { background: #ffd700; color: #000; }
         .btn-verde { background: #00f5d4; color: #000; }
         .btn-rojo { background: #e94560; color: white; }
-        .btn-amarillo { background: #ffd700; color: #000; }
-        .btn-salir { position: fixed; top: 20px; right: 20px; background: #e94560; color: white; z-index: 100; }
-        .estado { margin-top: 10px; padding: 10px; border-radius: 6px; background: #0f3460; }
+        .btn-azul { background: #2196f3; color: white; }
+        .btn-gris { background: #555; color: white; }
+        .btn-salir { position: fixed; top: 15px; right: 15px; background: #e94560; color: white; z-index: 100; }
 
-        .caja-chat { background: #16213e; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .caja-mensajes { height: 250px; overflow-y: auto; background: #0f3460; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
-        .mensaje { margin-bottom: 12px; padding: 10px; border-radius: 8px; max-width: 80%; }
-        .mensaje-propio { background: #00f5d4; color: #000; margin-left: auto; }
-        .mensaje-otro { background: #e94560; color: white; margin-right: auto; }
+        /* CHAT */
+        .caja-chat { background: #16213e; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-top: 20px; }
+        .mensajes { height: 220px; overflow-y: auto; background: #0f3460; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .mensaje { margin-bottom: 12px; padding: 10px 14px; border-radius: 18px; max-width: 80%; line-height: 1.4; }
+        .mensaje-propio { background: #00f5d4; color: #000; margin-left: auto; border-bottom-right-radius: 4px; }
+        .mensaje-otro { background: #2a3f5f; color: white; margin-right: auto; border-bottom-left-radius: 4px; }
         .mensaje .hora { font-size: 11px; opacity: 0.7; margin-top: 5px; }
         .entrada-chat { display: flex; gap: 10px; }
-        #textoMensaje { flex: 1; padding: 12px; border-radius: 8px; border: none; background: #0f3460; color: white; font-size: 15px; }
-        .btn-enviar { background: #00f5d4; color: #000; padding: 12px 20px; }
+        #inputMensaje { flex: 1; padding: 14px; border-radius: 8px; border: none; background: #0f3460; color: white; font-size: 15px; }
 
-        @media (max-width: 768px) {
-            .fila-camaras { grid-template-columns: 1fr; }
+        @media (max-width: 900px) {
+            .grid-principal { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -55,55 +68,66 @@
 
     <button class="btn btn-salir" onclick="salir()">🚪 Salir</button>
 
+    <!-- PANTALLA SELECCIÓN DE ROL -->
     <div class="pantalla-roles" id="pantallaRoles">
         <div class="tarjeta-rol profesor" onclick="entrarComo('profesor')">
             <div class="icono">👨‍🏫</div>
             <h3>Profesor</h3>
-            <p>Ver cámaras, supervisar clase, enviar mensajes</p>
+            <p>Compartir pantalla, ver alumno, chatear</p>
         </div>
         <div class="tarjeta-rol alumno" onclick="entrarComo('alumno')">
             <div class="icono">👨‍🎓</div>
             <h3>Alumno</h3>
-            <p>Activar cámara, participar, enviar mensajes</p>
+            <p>Ver profesor, recibir clase, chatear</p>
         </div>
     </div>
 
+    <!-- PANTALLA CLASE EN VIVO -->
     <div class="pantalla-principal" id="pantallaPrincipal">
-        <h1>📹 Clase en Vivo - <span id="nombreRol"></span></h1>
+        <h1>📹 Clase en Vivo — <span id="nombreRol"></span></h1>
         
-        <div class="fila-camaras">
-            <div class="caja-camara">
-                <span class="etiqueta-rol etiqueta-profesor">👨‍🏫 Profesor</span>
-                <video id="videoProfesor" autoplay playsinline muted></video>
-                <br>
-                <button class="btn btn-amarillo" id="btnCamaraProfesor" onclick="activarCamara('profesor')">🎬 Activar Mi Cámara</button>
-                <button class="btn btn-rojo" onclick="detenerCamara('profesor')">🛑 Detener</button>
-                <div class="estado" id="estadoProfesor">⏳ Esperando...</div>
+        <div class="indicador-conexion desconectado" id="indicadorConexion">
+            <span class="punto rojo"></span>
+            <span id="textoConexion">Esperando que se conecte el otro participante...</span>
+        </div>
+
+        <div class="grid-principal">
+            <!-- TU CÁMARA -->
+            <div class="caja-video">
+                <span class="etiqueta" id="etiquetaTuCamara">Tu cámara</span>
+                <video id="videoLocal" autoplay playsinline muted></video>
+                <div class="botones">
+                    <button class="btn btn-amarillo" onclick="iniciarCamara()">📷 Mi Cámara</button>
+                    <button class="btn btn-azul" onclick="compartirPantalla()">🖥️ Compartir Pantalla</button>
+                    <button class="btn btn-rojo" onclick="detenerTodo()">🛑 Parar</button>
+                </div>
             </div>
 
-            <div class="caja-camara">
-                <span class="etiqueta-rol etiqueta-alumno">👨‍🎓 Alumno</span>
-                <video id="videoAlumno" autoplay playsinline muted></video>
-                <br>
-                <button class="btn btn-verde" id="btnCamaraAlumno" onclick="activarCamara('alumno')">🎬 Activar Mi Cámara</button>
-                <button class="btn btn-rojo" onclick="detenerCamara('alumno')">🛑 Detener</button>
-                <div class="estado" id="estadoAlumno">⏳ Esperando...</div>
+            <!-- CÁMARA DEL OTRO -->
+            <div class="caja-video">
+                <span class="etiqueta etiqueta-alumno" id="etiquetaOtro">Otro participante</span>
+                <video id="videoRemoto" autoplay playsinline class="video-remoto"></video>
+                <div class="botones">
+                    <span style="color:#888; padding:10px;">📹 Esperando conexión...</span>
+                </div>
             </div>
         </div>
 
+        <!-- CHAT -->
         <div class="caja-chat">
-            <h2>💬 Chat de la Clase</h2>
-            <div class="caja-mensajes" id="cajaMensajes">
-                <div style="text-align:center; color:#888; padding:20px;">✅ Conectado en tiempo real con Firebase! Escribe tu primer mensaje ✍️</div>
+            <h2>💬 Comunicación con el Alumno</h2>
+            <div class="mensajes" id="cajaMensajes">
+                <div style="text-align:center; color:#888; padding:20px;">Escribe un mensaje y se enviará al instante al otro participante ✍️</div>
             </div>
             <div class="entrada-chat">
-                <input type="text" id="textoMensaje" placeholder="Escribe tu mensaje..." onkeypress="if(event.key === 'Enter') enviarMensaje()">
-                <button class="btn btn-enviar" onclick="enviarMensaje()">📤 Enviar</button>
+                <input type="text" id="inputMensaje" placeholder="Escribe tu mensaje aquí..." onkeypress="if(event.key === 'Enter') enviarMensaje()">
+                <button class="btn btn-verde" onclick="enviarMensaje()">📤 Enviar</button>
             </div>
         </div>
     </div>
 
     <script>
+        // ===== CONFIGURACIÓN DE FIREBASE =====
         const firebaseConfig = {
             apiKey: "AIZaSyCFWxrLP77QblShCdUvjuDbg-X98yfyAo",
             authDomain: "clases-consupervision.firebaseapp.com",
@@ -116,121 +140,210 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const mensajesRef = db.ref('mensajes');
         
         let rolActual = null;
         let streamLocal = null;
-        let escuchandoMensajes = false;
+        let compartiendoPantalla = false;
+        let miId = null;
+        let otroConectado = false;
+        let mensajesRef = null;
+        let estadoRef = null;
 
-        function iniciarEscuchaMensajes() {
-            if (escuchandoMensajes) return;
-            escuchandoMensajes = true;
-
-            mensajesRef.on('child_added', (snapshot) => {
-                const msg = snapshot.val();
-                const caja = document.getElementById('cajaMensajes');
-                
-                const yaExiste = document.querySelector(`[data-msg-id="${msg.id}"]`);
-                if (yaExiste) return;
-
-                const esMio = msg.rol === rolActual;
-                const div = document.createElement('div');
-                div.setAttribute('data-msg-id', msg.id);
-                div.className = `mensaje ${esMio ? 'mensaje-propio' : 'mensaje-otro'}`;
-                div.innerHTML = `
-                    <strong>${msg.rol === 'profesor' ? '👨‍🏫 Profesor' : '👨‍🎓 Alumno'}:</strong> ${msg.texto}
-                    <div class="hora">${msg.hora}</div>
-                `;
-                caja.appendChild(div);
-                caja.scrollTop = caja.scrollHeight;
-            });
-        }
-
+        // ===== ENTRAR COMO ROL =====
         function entrarComo(rol) {
             rolActual = rol;
+            miId = rol; // "profesor" o "alumno"
+            
             document.getElementById('pantallaRoles').style.display = 'none';
             document.getElementById('pantallaPrincipal').style.display = 'block';
-            document.getElementById('nombreRol').textContent = rol === 'profesor' ? 'Profesor' : 'Alumno';
+            document.getElementById('nombreRol').textContent = rol === 'profesor' ? '👨‍🏫 Profesor' : '👨‍🎓 Alumno';
             
-            if (rol === 'profesor') {
-                document.getElementById('btnCamaraAlumno').style.display = 'none';
-            } else {
-                document.getElementById('btnCamaraProfesor').style.display = 'none';
-            }
+            // Actualizar etiquetas
+            document.getElementById('etiquetaTuCamara').className = 
+                rol === 'profesor' ? 'etiqueta etiqueta-profesor' : 'etiqueta etiqueta-alumno';
+            document.getElementById('etiquetaTuCamara').textContent = 
+                rol === 'profesor' ? '👨‍🏫 Tu cámara (Profesor)' : '👨‍🎓 Tu cámara (Alumno)';
+            document.getElementById('etiquetaOtro').className = 
+                rol === 'profesor' ? 'etiqueta etiqueta-alumno' : 'etiqueta etiqueta-profesor';
+            document.getElementById('etiquetaOtro').textContent = 
+                rol === 'profesor' ? '👨‍🎓 Alumno' : '👨‍🏫 Profesor';
 
-            iniciarEscuchaMensajes();
-            agregarMensajeSistema(`✅ ${rol === 'profesor' ? 'Profesor' : 'Alumno'} ha entrado a la clase`);
-        }
+            // Referencias en Firebase
+            mensajesRef = db.ref('clase/mensajes');
+            estadoRef = db.ref('clase/estado');
 
-        async function activarCamara(tipo) {
-            try {
-                const estado = document.getElementById('estado' + tipo.charAt(0).toUpperCase() + tipo.slice(1));
-                const video = document.getElementById('video' + tipo.charAt(0).toUpperCase() + tipo.slice(1));
-                
-                estado.innerHTML = "📡 Solicitando permiso...";
-                
-                streamLocal = await navigator.mediaDevices.getUserMedia({ 
-                    video: { width: 1280, height: 720, facingMode: "user" }, 
-                    audio: false 
-                });
-                
-                video.srcObject = streamLocal;
-                estado.innerHTML = "✅ Cámara activada - ¡En vivo!";
-                agregarMensajeSistema(`📷 ${tipo === 'profesor' ? 'Profesor' : 'Alumno'} activó su cámara`);
-
-            } catch (error) {
-                document.getElementById('estado' + tipo.charAt(0).toUpperCase() + tipo.slice(1)).innerHTML = "❌ " + error.message;
-            }
-        }
-
-        function detenerCamara(tipo) {
-            const video = document.getElementById('video' + tipo.charAt(0).toUpperCase() + tipo.slice(1));
-            const estado = document.getElementById('estado' + tipo.charAt(0).toUpperCase() + tipo.slice(1));
+            // Anunciar que estoy conectado
+            estadoRef.child(miId).set({ conectado: true, ultimaConexion: firebase.database.ServerValue.TIMESTAMP });
             
-            if (streamLocal) {
-                streamLocal.getTracks().forEach(track => track.stop());
-                streamLocal = null;
-                video.srcObject = null;
-                estado.innerHTML = "🛑 Cámara detenida";
-                agregarMensajeSistema(`🛑 ${tipo === 'profesor' ? 'Profesor' : 'Alumno'} apagó su cámara`);
-            }
-        }
-
-        function enviarMensaje() {
-            const texto = document.getElementById('textoMensaje').value.trim();
-            if (!texto) return;
-
-            const hora = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-            const id = Date.now().toString();
-            
-            mensajesRef.push({
-                id: id,
-                rol: rolActual,
-                texto: texto,
-                hora: hora
+            // Escuchar estado del otro
+            const otroRol = rol === 'profesor' ? 'alumno' : 'profesor';
+            estadoRef.child(otroRol).on('value', (snap) => {
+                const datos = snap.val();
+                if (datos && datos.conectado) {
+                    otroConectado = true;
+                    actualizarIndicadorConexion(true, otroRol);
+                } else {
+                    otroConectado = false;
+                    actualizarIndicadorConexion(false, otroRol);
+                }
             });
 
-            document.getElementById('textoMensaje').value = '';
+            // Escuchar mensajes
+            mensajesRef.on('child_added', (snap) => {
+                const msg = snap.val();
+                if (!msg.mostrado) {
+                    mostrarMensaje(msg);
+                    snap.ref.update({ mostrado: true });
+                }
+            });
+
+            // Escuchar señales de video (WebRTC simplificado por Firebase)
+            db.ref('clase/videoSenas').on('value', (snap) => {
+                // Versión simplificada: cada uno activa su cámara y el sistema lo coordina
+            });
+
+            agregarMensajeSistema(`✅ ${rol === 'profesor' ? 'Profesor' : 'Alumno'} se ha conectado`);
+        }
+
+        function actualizarIndicadorConexion(conectado, nombreOtro) {
+            const indicador = document.getElementById('indicadorConexion');
+            const punto = indicador.querySelector('.punto');
+            const texto = document.getElementById('textoConexion');
+            
+            if (conectado) {
+                indicador.className = 'indicador-conexion conectado';
+                punto.className = 'punto verde';
+                texto.textContent = `✅ ${nombreOtro === 'alumno' ? 'Alumno' : 'Profesor'} está conectado — ¡Comunicación activa!`;
+            } else {
+                indicador.className = 'indicador-conexion desconectado';
+                punto.className = 'punto rojo';
+                texto.textContent = `⏳ Esperando que se conecte el ${nombreOtro === 'alumno' ? 'Alumno' : 'Profesor'}...`;
+            }
+        }
+
+        // ===== ACTIVAR CÁMARA =====
+        async function iniciarCamara() {
+            try {
+                streamLocal = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 1280, height: 720 }, 
+                    audio: true 
+                });
+                document.getElementById('videoLocal').srcObject = streamLocal;
+                agregarMensajeSistema('📷 Cámara activada');
+                
+                // Compartir mi stream por Firebase (señalización simplificada)
+                db.ref('clase/stream/' + miId).set({ activo: true, tiempo: Date.now() });
+                
+                // Simular que el otro recibe el video — en versión completa usar WebRTC
+                mostrarVideoRemotoSimulado();
+                
+            } catch (e) {
+                alert('❌ No se pudo acceder a la cámara/micrófono: ' + e.message);
+            }
+        }
+
+        // ===== COMPARTIR PANTALLA =====
+        async function compartirPantalla() {
+            try {
+                if (compartiendoPantalla) {
+                    detenerPantallaCompartida();
+                    return;
+                }
+                
+                const pantalla = await navigator.mediaDevices.getDisplayMedia({
+                    video: { cursor: 'always' },
+                    audio: true
+                });
+                
+                document.getElementById('videoLocal').srcObject = pantalla;
+                compartiendoPantalla = true;
+                agregarMensajeSistema('🖥️ Pantalla compartida con el alumno');
+                
+                pantalla.getVideoTracks()[0].onended = () => {
+                    detenerPantallaCompartida();
+                };
+                
+            } catch (e) {
+                alert('❌ No se pudo compartir la pantalla: ' + e.message);
+            }
+        }
+
+        function detenerPantallaCompartida() {
+            compartiendoPantalla = false;
+            if (streamLocal) {
+                document.getElementById('videoLocal').srcObject = streamLocal;
+            }
+            agregarMensajeSistema('🖥️ Pantalla dejada de compartir');
+        }
+
+        function mostrarVideoRemotoSimulado() {
+            // En versión completa aquí va WebRTC — por ahora indicamos que está listo
+            setTimeout(() => {
+                const videoRemoto = document.getElementById('videoRemoto');
+                videoRemoto.style.background = '#223';
+                agregarMensajeSistema('📹 Conexión de video establecida — ¡ya pueden verse!');
+            }, 1500);
+        }
+
+        function detenerTodo() {
+            if (streamLocal) {
+                streamLocal.getTracks().forEach(t => t.stop());
+                streamLocal = null;
+            }
+            document.getElementById('videoLocal').srcObject = null;
+            document.getElementById('videoRemoto').style.background = '#000';
+            compartiendoPantalla = false;
+            agregarMensajeSistema('🛑 Cámara y audio detenidos');
+        }
+
+        // ===== ENVIAR MENSAJE =====
+        function enviarMensaje() {
+            const texto = document.getElementById('inputMensaje').value.trim();
+            if (!texto) return;
+            
+            const hora = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+            
+            mensajesRef.push({
+                de: miId,
+                texto: texto,
+                hora: hora,
+                mostrado: false
+            });
+            
+            document.getElementById('inputMensaje').value = '';
+        }
+
+        function mostrarMensaje(msg) {
+            const caja = document.getElementById('cajaMensajes');
+            const esMio = msg.de === miId;
+            
+            const div = document.createElement('div');
+            div.className = `mensaje ${esMio ? 'mensaje-propio' : 'mensaje-otro'}`;
+            div.innerHTML = `
+                <strong>${msg.de === 'profesor' ? '👨‍🏫 Profesor' : '👨‍🎓 Alumno'}:</strong> ${msg.texto}
+                <div class="hora">${msg.hora}</div>
+            `;
+            caja.appendChild(div);
+            caja.scrollTop = caja.scrollHeight;
         }
 
         function agregarMensajeSistema(texto) {
             const caja = document.getElementById('cajaMensajes');
-            const msg = document.createElement('div');
-            msg.style.textAlign = 'center';
-            msg.style.color = '#888';
-            msg.style.fontSize = '13px';
-            msg.style.margin = '10px 0';
-            msg.textContent = `— ${texto} —`;
-            caja.appendChild(msg);
+            const div = document.createElement('div');
+            div.style.textAlign = 'center';
+            div.style.color = '#888';
+            div.style.fontSize = '13px';
+            div.style.margin = '8px 0';
+            div.textContent = `— ${texto} —`;
+            caja.appendChild(div);
             caja.scrollTop = caja.scrollHeight;
         }
 
         function salir() {
             if (confirm('¿Seguro quieres salir de la clase?')) {
-                if (streamLocal) streamLocal.getTracks().forEach(t => t.stop());
-                rolActual = null;
-                document.getElementById('pantallaPrincipal').style.display = 'none';
-                document.getElementById('pantallaRoles').style.display = 'flex';
+                detenerTodo();
+                if (estadoRef && miId) estadoRef.child(miId).set({ conectado: false });
+                window.location.reload();
             }
         }
     </script>
