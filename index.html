@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📚 Clases con Supervisión — Todos se ven</title>
+    <title>Clases en Vivo con Supervisión</title>
     <style>
         * {
             margin: 0;
@@ -11,829 +11,447 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
         :root {
             --primario: #1a237e;
             --secundario: #283593;
-            --acento: #ffc107;
-            --exito: #4caf50;
-            --peligro: #f44336;
-            --advertencia: #ff9800;
+            --acento: #ff6f00;
             --fondo: #f5f7fa;
-            --texto: #333;
             --blanco: #ffffff;
+            --sombra: rgba(0,0,0,0.1);
         }
-
         body {
-            background: var(--fondo);
-            color: var(--texto);
-            min-height: 100vh;
-        }
-
-        nav {
             background: linear-gradient(135deg, var(--primario), var(--secundario));
-            padding: 15px 40px;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            min-height: 100vh;
+            padding: 20px;
         }
-
-        .nav-contenedor {
-            max-width: 1400px;
+        .contenedor {
+            max-width: 900px;
             margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
-
-        .logo {
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo span {
-            color: var(--acento);
-        }
-
-        .panel-supervisor {
-            background: rgba(249, 168, 7, 0.2);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 2px solid var(--acento);
-        }
-
-        .pantalla-entrada {
-            margin-top: 80px;
-            padding: 60px 40px;
-            min-height: calc(100vh - 80px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .tarjeta-union {
-            background: white;
-            border-radius: 20px;
-            padding: 50px 40px;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
-            max-width: 550px;
-            width: 100%;
+        .cabecera {
             text-align: center;
+            color: white;
+            margin-bottom: 30px;
         }
-
-        .tarjeta-union h1 {
-            font-size: 30px;
+        .cabecera h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .cabecera p {
+            opacity: 0.9;
+        }
+        .tarjeta {
+            background: var(--blanco);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px var(--sombra);
+            margin-bottom: 25px;
+        }
+        .pantalla-inicio { display: block; }
+        .pantalla-sala { display: none; }
+        h2 {
             color: var(--primario);
-            margin-bottom: 10px;
-        }
-
-        .tarjeta-union p {
-            color: #666;
-            font-size: 17px;
-            margin-bottom: 30px;
-        }
-
-        .selector-rol {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .tarjeta-rol {
-            flex: 1;
-            min-width: 140px;
-            padding: 25px 15px;
-            border: 3px solid #e0e0e0;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
             text-align: center;
+            margin-bottom: 25px;
         }
-
-        .tarjeta-rol.seleccionado {
-            border-color: var(--primario);
-            background: rgba(26, 35, 126, 0.05);
-            transform: scale(1.03);
-        }
-
-        .tarjeta-rol.supervisor.seleccionado {
-            border-color: var(--acento);
-            background: rgba(249, 168, 7, 0.1);
-        }
-
-        .tarjeta-rol .emoji {
-            font-size: 45px;
-            margin-bottom: 10px;
-        }
-
-        .tarjeta-rol h3 {
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-
-        .tarjeta-rol p {
-            font-size: 13px;
-            color: #888;
-            margin: 0;
-        }
-
-        .input-grupo {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .input-grupo label {
+        .campo { margin-bottom: 20px; }
+        label {
             display: block;
             font-weight: 600;
+            color: #333;
             margin-bottom: 8px;
-            color: #444;
         }
-
-        .input-grupo input, .input-grupo select {
+        input, select {
             width: 100%;
             padding: 14px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
-            font-size: 16px;
+            font-size: 1rem;
         }
-
-        .btn-entrar {
+        input:focus {
+            outline: none;
+            border-color: var(--primario);
+        }
+        .roles {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+        .rol {
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .rol:hover {
+            border-color: var(--primario);
+            transform: translateY(-3px);
+        }
+        .rol.seleccionado {
+            border-color: var(--primario);
+            background: #e8eaf6;
+        }
+        .rol .icono {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .boton {
             width: 100%;
             padding: 16px;
-            font-size: 18px;
-            background: linear-gradient(135deg, var(--primario), var(--secundario));
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-
-        .btn-entrar:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(26, 35, 126, 0.4);
-        }
-
-        .salon-clases {
-            display: none;
-            margin-top: 80px;
-            padding: 20px;
-            min-height: calc(100vh - 80px);
-        }
-
-        .salon-activo {
-            display: block;
-        }
-
-        .salon-contenedor {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 340px;
-            gap: 20px;
-            height: calc(100vh - 120px);
-        }
-
-        .zona-videos {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .cuadricula-videos {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
-            flex: 1;
-            min-height: 400px;
-        }
-
-        .tarjeta-video {
-            background: #1a1a2e;
-            border-radius: 15px;
-            position: relative;
-            overflow: hidden;
-            aspect-ratio: 16/9;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-        }
-
-        .tarjeta-video video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .tarjeta-video .sin-video {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-
-        .sin-video .emoji {
-            font-size: 50px;
-            margin-bottom: 10px;
-        }
-
-        .etiqueta-nombre {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
-            color: white;
-            padding: 12px 10px 8px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .etiqueta-rol {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .etiqueta-rol.profesor { background: var(--exito); color: white; }
-        .etiqueta-rol.supervisor { background: var(--acento); color: black; }
-        .etiqueta-rol.alumno { background: #2196f3; color: white; }
-
-        .indicador-hablando {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 14px;
-            height: 14px;
-            background: var(--exito);
-            border-radius: 50%;
-            display: none;
-        }
-
-        .tarjeta-video.hablando .indicador-hablando {
-            display: block;
-            animation: pulso-hablando 1s infinite;
-        }
-
-        @keyframes pulso-hablando {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
-            50% { box-shadow: 0 0 0 8px rgba(76, 175, 80, 0); }
-        }
-
-        .controles-supervision {
-            background: rgba(249, 168, 7, 0.1);
-            border: 2px solid var(--acento);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-        }
-
-        .controles-supervision h3 {
-            color: var(--primario);
-            font-size: 16px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-supervision {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            margin: 5px;
-            transition: all 0.2s ease;
-        }
-
-        .btn-supervision.silenciar { background: var(--advertencia); color: white; }
-        .btn-supervision.expulsar { background: var(--peligro); color: white; }
-        .btn-supervision:hover { transform: scale(1.05); }
-
-        .controles-generales {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            padding: 18px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-            flex-wrap: wrap;
-        }
-
-        .control-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: #eef2f5;
-        }
-
-        .control-btn:hover { transform: scale(1.1); }
-        .control-btn.activado { background: var(--exito); color: white; }
-        .control-btn.desactivado { background: var(--peligro); color: white; }
-        .control-btn.salir { background: var(--peligro); color: white; }
-        .control-btn.levantar-mano { background: var(--acento); color: black; }
-
-        .panel-lateral {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            height: 100%;
-        }
-
-        .panel {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-            overflow: hidden;
-        }
-
-        .panel-cabecera {
-            background: linear-gradient(135deg, var(--primario), var(--secundario));
-            color: white;
-            padding: 15px 20px;
-            font-weight: bold;
-            font-size: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .panel-cuerpo {
-            padding: 15px;
-            overflow-y: auto;
-        }
-
-        .participante-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 8px;
-            background: #f8f9fa;
-        }
-
-        .participante-item.profesor {
-            background: rgba(76, 175, 80, 0.1);
-            border-left: 4px solid var(--exito);
-        }
-
-        .participante-item.supervisor {
-            background: rgba(249, 168, 7, 0.15);
-            border-left: 4px solid var(--acento);
-        }
-
-        .participante-item .emoji { font-size: 24px; }
-        .participante-info { flex: 1; }
-        .participante-nombre { font-weight: 600; font-size: 15px; }
-        .participante-tiempo { font-size: 12px; color: #888; }
-        .estado-conectado {
-            width: 10px;
-            height: 10px;
-            background: var(--exito);
-            border-radius: 50%;
-        }
-
-        .chat-mensajes {
-            height: 200px;
-            overflow-y: auto;
-            margin-bottom: 10px;
-        }
-
-        .mensaje {
-            padding: 10px 14px;
-            border-radius: 15px;
-            margin-bottom: 10px;
-            max-width: 85%;
-            font-size: 14px;
-        }
-
-        .mensaje.profesor {
-            background: rgba(76, 175, 80, 0.15);
-            border-left: 3px solid var(--exito);
-        }
-
-        .mensaje.supervisor {
-            background: rgba(249, 168, 7, 0.2);
-            border-left: 3px solid var(--acento);
-        }
-
-        .mensaje.alumno {
-            background: #e3f2fd;
-            margin-left: auto;
-            border-right: 3px solid #2196f3;
-        }
-
-        .mensaje-nombre {
-            font-weight: bold;
-            font-size: 12px;
-            margin-bottom: 4px;
-            color: #555;
-        }
-
-        .chat-input {
-            display: flex;
-            gap: 10px;
-        }
-
-        .chat-input input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 15px;
-        }
-
-        .chat-input button {
-            padding: 12px 20px;
             background: var(--primario);
             color: white;
             border: none;
             border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
+            transition: background 0.3s;
+        }
+        .boton:hover { background: var(--secundario); }
+        .sala-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .mi-rol {
+            padding: 8px 20px;
+            border-radius: 20px;
             font-weight: bold;
+            color: white;
         }
-
-        .registro-actividad {
-            max-height: 180px;
-            overflow-y: auto;
+        .rol-profesor { background: #d81b60; }
+        .rol-alumno { background: #2e7d32; }
+        .rol-supervisor { background: #424242; }
+        .lista-conectados { margin-top: 20px; }
+        .lista-conectados h3 {
+            color: var(--primario);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-
-        .entrada-registro {
-            font-size: 13px;
-            padding: 8px 10px;
-            border-bottom: 1px solid #eee;
-            color: #555;
+        .contador {
+            font-size: 0.9rem;
+            background: #e8eaf6;
+            padding: 4px 12px;
+            border-radius: 12px;
+            color: var(--primario);
         }
-
-        .entrada-registro.entrada { color: var(--exito); }
-        .entrada-registro.salida { color: var(--peligro); }
-        .entrada-registro.mensaje { color: #2196f3; }
-
-        .oculto { display: none !important; }
-
-        @media (max-width: 900px) {
-            .salon-contenedor { grid-template-columns: 1fr; }
-            .selector-rol { flex-direction: column; }
+        .persona {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid;
+        }
+        .persona.profesor { border-left-color: #d81b60; }
+        .persona.alumno { border-left-color: #2e7d32; }
+        .persona .icono {
+            font-size: 1.8rem;
+            margin-right: 15px;
+        }
+        .persona .nombre {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .etiqueta-rol {
+            margin-left: auto;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: white;
+        }
+        .etiqueta-rol.profesor { background: #d81b60; }
+        .etiqueta-rol.alumno { background: #2e7d32; }
+        .estado {
+            margin-left: 10px;
+            width: 10px;
+            height: 10px;
+            background: #4caf50;
+            border-radius: 50%;
+            animation: parpadeo 2s infinite;
+        }
+        @keyframes parpadeo {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .boton-salir {
+            background: #e53935;
+            margin-top: 20px;
+        }
+        .boton-salir:hover { background: #c62828; }
+        .actualizando {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            font-style: italic;
+        }
+        .aviso-supervisor {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-
-    <nav>
-        <div class="nav-contenedor">
-            <a href="#" class="logo">📚 <span>ClasesConVigilancia</span></a>
-            <div id="etiqueta-supervisor" class="panel-supervisor oculto">
-                👁️ MODO SUPERVISOR — Monitoreando todo
-            </div>
-        </div>
-    </nav>
-
-    <section class="pantalla-entrada" id="pantalla-entrada">
-        <div class="tarjeta-union">
+    <div class="contenedor">
+        <div class="cabecera">
             <h1>🎓 Clases en Vivo con Supervisión</h1>
-            <p>Todos se ven, todos escuchan, el supervisor monitorea todo 👁️</p>
-
-            <div class="selector-rol">
-                <div class="tarjeta-rol" id="rol-profesor" onclick="seleccionarRol('profesor')">
-                    <div class="emoji">👨‍🏫</div>
-                    <h3>Profesor</h3>
-                    <p>Da la clase, explica, responde</p>
-                </div>
-                <div class="tarjeta-rol" id="rol-alumno" onclick="seleccionarRol('alumno')">
-                    <div class="emoji">👩‍🎓</div>
-                    <h3>Alumno</h3>
-                    <p>Ve, escucha, pregunta, aprende</p>
-                </div>
-                <div class="tarjeta-rol supervisor" id="rol-supervisor" onclick="seleccionarRol('supervisor')">
-                    <div class="emoji">👁️</div>
-                    <h3>Supervisor</h3>
-                    <p>Monitorea cámaras, audio y chat</p>
-                </div>
-            </div>
-
-            <div class="input-grupo">
-                <label>📝 Tu Nombre Completo</label>
-                <input type="text" id="nombre-usuario" placeholder="Escribe tu nombre..." required>
-            </div>
-
-            <div class="input-grupo">
-                <label>📚 Materia</label>
-                <select id="materia-clase">
-                    <option value="matematicas">📐 Matemáticas</option>
-                    <option value="fisica">⚛️ Física</option>
-                    <option value="quimica">🧪 Química</option>
-                </select>
-            </div>
-
-            <button class="btn-entrar" onclick="entrarAlSalon()">🚀 Entrar al Salón</button>
+            <p>El supervisor monitorea de forma discreta — nadie sabe que está ahí 👁️🔒</p>
         </div>
-    </section>
 
-    <section class="salon-clases" id="pantalla-salon">
-        <div class="salon-contenedor">
+        <!-- === PANTALLA DE INICIO === -->
+        <div class="tarjeta pantalla-inicio" id="pantallaInicio">
+            <h2>👋 ¡Bienvenido! Ingresa tus datos</h2>
             
-            <div class="zona-videos">
-                <div class="cuadricula-videos" id="cuadricula-videos"></div>
+            <div class="campo">
+                <label for="nombre">Tu Nombre Completo</label>
+                <input type="text" id="nombre" placeholder="Escribe tu nombre completo..." required>
+            </div>
 
-                <div class="controles-supervision oculto" id="panel-supervision">
-                    <h3>👁️ PANEL DE SUPERVISIÓN — Control Total</h3>
-                    <p style="font-size:14px; color:#666; margin-bottom:10px;">Tú ves y escuchas a TODOS. Puedes silenciar o desconectar a cualquiera.</p>
-                    <div id="controles-participantes"></div>
+            <h3 style="text-align:center; color:#333; margin:20px 0;">Selecciona tu rol:</h3>
+            
+            <div class="roles">
+                <div class="rol" data-rol="profesor" id="rolProfesor">
+                    <div class="icono">👨‍🏫</div>
+                    <div><strong>Profesor</strong></div>
+                    <div style="font-size:0.85rem; color:#666; margin-top:5px;">Da la clase, todos lo ven</div>
                 </div>
-
-                <div class="controles-generales">
-                    <button class="control-btn activado" id="btn-camara" onclick="toggleCamara()">📷</button>
-                    <button class="control-btn activado" id="btn-microfono" onclick="toggleMicrofono()">🎤</button>
-                    <button class="control-btn" id="btn-mano" onclick="levantarMano()">✋</button>
-                    <button class="control-btn" onclick="compartirPantalla()">🖥️</button>
-                    <button class="control-btn salir" onclick="salirDelSalon()">🚪</button>
+                <div class="rol" data-rol="alumno" id="rolAlumno">
+                    <div class="icono">👨‍🎓</div>
+                    <div><strong>Alumno</strong></div>
+                    <div style="font-size:0.85rem; color:#666; margin-top:5px;">Participa, ve a compañeros</div>
+                </div>
+                <div class="rol" data-rol="supervisor" id="rolSupervisor">
+                    <div class="icono">👁️</div>
+                    <div><strong>Supervisor</strong></div>
+                    <div style="font-size:0.85rem; color:#666; margin-top:5px;">Entra INVISIBLE — nadie lo ve 🔒</div>
                 </div>
             </div>
 
-            <div class="panel-lateral">
-                
-                <div class="panel">
-                    <div class="panel-cabecera">👥 Conectados (<span id="cantidad-participantes">1</span>)</div>
-                    <div class="panel-cuerpo" id="lista-participantes"></div>
-                </div>
-
-                <div class="panel oculto" id="panel-registro">
-                    <div class="panel-cabecera">📋 Registro de Actividad 👁️</div>
-                    <div class="panel-cuerpo registro-actividad" id="registro-actividad"></div>
-                </div>
-
-                <div class="panel" style="flex:1;">
-                    <div class="panel-cabecera">💬 Chat en Vivo</div>
-                    <div class="panel-cuerpo chat-mensajes" id="caja-chat">
-                        <div class="mensaje profesor">
-                            <div class="mensaje-nombre">📢 Sistema</div>
-                            ¡Bienvenidos! La clase está en sesión. El supervisor monitorea toda la actividad 👁️
-                        </div>
-                    </div>
-                    <div class="chat-input">
-                        <input type="text" id="entrada-chat" placeholder="Escribe tu mensaje..." onkeypress="if(event.key==='Enter')enviarMensaje()">
-                        <button onclick="enviarMensaje()">➤</button>
-                    </div>
-                </div>
-            </div>
+            <button class="boton" id="btnEntrar">🚀 Entrar a la Sala</button>
         </div>
-    </section>
+
+        <!-- === SALA === -->
+        <div class="tarjeta pantalla-sala" id="pantallaSala">
+            <div class="sala-header">
+                <h2 id="tituloSala">🏫 Sala de Clase en Vivo</h2>
+                <div class="mi-rol" id="miRol">👨‍🏫 Profesor</div>
+            </div>
+
+            <!-- SOLO EL SUPERVISOR VE ESTE AVISO -->
+            <div class="aviso-supervisor" id="avisoSupervisor" style="display:none;">
+                👁️🔒 <strong>Modo Incógnito Activado</strong><br>
+                Nadie sabe que estás conectado. Tú ves a todos, pero nadie te ve a ti.
+            </div>
+
+            <div class="lista-conectados">
+                <h3>
+                    📋 Personas Conectadas
+                    <span class="contador" id="contadorTotal">0 conectados</span>
+                </h3>
+                <div id="listaPersonas"></div>
+            </div>
+
+            <p class="actualizando">🔄 La lista se actualiza automáticamente cada pocos segundos</p>
+
+            <button class="boton boton-salir" id="btnSalir">🚪 Salir de la Sala</button>
+        </div>
+    </div>
 
     <script>
-        let rolUsuario = null;
-        let nombreUsuario = null;
-        let materiaActual = null;
-        let camaraActiva = true;
-        let microfonoActivo = true;
-        let streamLocal = null;
-        let participantes = [];
-        let tiempoEntrada = new Date();
+        // === ALMACENAMIENTO COMPARTIDO ===
+        const CLAVE_VISIBLES = 'clases_visibles_lista';
+        const CLAVE_SUPERVISORES = 'clases_supervisores_ocultos';
+        
+        let miNombre = '';
+        let miRol = '';
+        let miId = '';
+        let actualizarIntervalo = null;
 
-        function seleccionarRol(rol) {
-            rolUsuario = rol;
-            document.querySelectorAll('.tarjeta-rol').forEach(r => r.classList.remove('seleccionado'));
-            document.getElementById(`rol-${rol}`).classList.add('seleccionado');
-        }
+        // === ELEMENTOS ===
+        const pantallaInicio = document.getElementById('pantallaInicio');
+        const pantallaSala = document.getElementById('pantallaSala');
+        const inputNombre = document.getElementById('nombre');
+        const btnEntrar = document.getElementById('btnEntrar');
+        const btnSalir = document.getElementById('btnSalir');
+        const listaPersonas = document.getElementById('listaPersonas');
+        const contadorTotal = document.getElementById('contadorTotal');
+        const miRolElemento = document.getElementById('miRol');
+        const avisoSupervisor = document.getElementById('avisoSupervisor');
+        const tituloSala = document.getElementById('tituloSala');
+        const roles = document.querySelectorAll('.rol');
 
-        function entrarAlSalon() {
-            nombreUsuario = document.getElementById('nombre-usuario').value.trim();
-            materiaActual = document.getElementById('materia-clase').value;
-
-            if (!nombreUsuario) { alert('⚠️ Escribe tu nombre para continuar'); return; }
-            if (!rolUsuario) { alert('⚠️ Selecciona tu rol: Profesor, Alumno o Supervisor'); return; }
-
-            document.getElementById('pantalla-entrada').classList.add('oculto');
-            document.getElementById('pantalla-salon').classList.add('salon-activo');
-
-            configurarInterfazPorRol();
-            agregarParticipante(nombreUsuario, rolUsuario, tiempoEntrada);
-
-            if (rolUsuario !== 'supervisor') activarCamaraLocal();
-            agregarRegistro(`${nombreUsuario} (${rolUsuario}) ha entrado`, 'entrada');
-
-            if (rolUsuario === 'supervisor') {
-                agregarParticipante('Carlos Mendoza', 'profesor', new Date());
-                agregarParticipante('María López', 'alumno', new Date());
-                agregarParticipante('Juan Pérez', 'alumno', new Date());
-                agregarParticipante('Ana García', 'alumno', new Date());
-                agregarRegistro('Carlos Mendoza ha iniciado la clase de ' + materiaActual, 'mensaje');
-            }
-        }
-
-        function configurarInterfazPorRol() {
-            if (rolUsuario === 'supervisor') {
-                document.getElementById('etiqueta-supervisor').classList.remove('oculto');
-                document.getElementById('panel-supervision').classList.remove('oculto');
-                document.getElementById('panel-registro').classList.remove('oculto');
-                document.getElementById('btn-camara').classList.add('oculto');
-                document.getElementById('btn-microfono').classList.add('oculto');
-            }
-        }
-
-        async function activarCamaraLocal() {
-            try {
-                streamLocal = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                crearTarjetaVideoLocal();
-            } catch (error) {
-                console.log('Error al acceder a cámara:', error);
-                agregarRegistro(`${nombreUsuario} no pudo activar su cámara`, 'mensaje');
-            }
-        }
-
-        function crearTarjetaVideoLocal() {
-            const cuadricula = document.getElementById('cuadricula-videos');
-            const tarjeta = document.createElement('div');
-            tarjeta.className = 'tarjeta-video';
-            tarjeta.id = `video-local-${rolUsuario}`;
-            tarjeta.innerHTML = `
-                <div class="etiqueta-rol ${rolUsuario}">${rolUsuario === 'profesor' ? '👨‍🏫 PROFESOR' : '👤 ALUMNO'}</div>
-                <div class="indicador-hablando"></div>
-                <video autoplay muted playsinline id="video-elemento-local"></video>
-                <div class="etiqueta-nombre">${nombreUsuario} (TÚ)</div>
-            `;
-            cuadricula.appendChild(tarjeta);
-            const video = tarjeta.querySelector('video');
-            video.srcObject = streamLocal;
-        }
-
-        function agregarParticipante(nombre, rol, hora) {
-            participantes.push({ nombre, rol, hora });
-            const lista = document.getElementById('lista-participantes');
-            const elemento = document.createElement('div');
-            elemento.className = `participante-item ${rol}`;
-            elemento.innerHTML = `
-                <span class="emoji">${rol === 'profesor' ? '👨‍🏫' : rol === 'supervisor' ? '👁️' : '👤'}</span>
-                <div class="participante-info">
-                    <div class="participante-nombre">${nombre} ${rol === 'supervisor' ? '(Supervisor)' : ''}</div>
-                    <div class="participante-tiempo">🟢 Conectado desde ${formatearHora(hora)}</div>
-                </div>
-                <span class="estado-conectado"></span>
-            `;
-            lista.appendChild(elemento);
-            if (rol !== 'supervisor' && nombre !== nombreUsuario) crearTarjetaVideoRemota(nombre, rol);
-            actualizarContador();
-            actualizarPanelSupervision();
-        }
-
-        function crearTarjetaVideoRemota(nombre, rol) {
-            const cuadricula = document.getElementById('cuadricula-videos');
-            const tarjeta = document.createElement('div');
-            tarjeta.className = 'tarjeta-video';
-            tarjeta.innerHTML = `
-                <div class="etiqueta-rol ${rol}">${rol === 'profesor' ? '👨‍🏫 PROFESOR' : '👤 ALUMNO'}</div>
-                <div class="indicador-hablando"></div>
-                <div class="sin-video">
-                    <div class="emoji">${rol === 'profesor' ? '👨‍🏫' : '👤'}</div>
-                    <p>Transmisión en vivo...</p>
-                </div>
-                <div class="etiqueta-nombre">${nombre}</div>
-            `;
-            cuadricula.appendChild(tarjeta);
-        }
-
-        function actualizarContador() {
-            document.getElementById('cantidad-participantes').textContent = participantes.length;
-        }
-
-        function actualizarPanelSupervision() {
-            if (rolUsuario !== 'supervisor') return;
-            const contenedor = document.getElementById('controles-participantes');
-            contenedor.innerHTML = '';
-            participantes.forEach((p, index) => {
-                if (p.rol !== 'supervisor') {
-                    const control = document.createElement('div');
-                    control.style = 'display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:#f8f9fa; border-radius:8px; margin-bottom:8px;';
-                    control.innerHTML = `
-                        <span style="font-weight:600;">${p.nombre}</span>
-                        <div>
-                            <button class="btn-supervision silenciar" onclick="silenciarParticipante(${index})">🔇 Silenciar</button>
-                            <button class="btn-supervision expulsar" onclick="expulsarParticipante(${index})">⛔ Expulsar</button>
-                        </div>
-                    `;
-                    contenedor.appendChild(control);
-                }
+        // === SELECCIONAR ROL ===
+        roles.forEach(rol => {
+            rol.addEventListener('click', () => {
+                roles.forEach(r => r.classList.remove('seleccionado'));
+                rol.classList.add('seleccionado');
+                miRol = rol.dataset.rol;
             });
+        });
+
+        // === GENERAR ID ===
+        function generarId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
         }
 
-        function silenciarParticipante(index) {
-            const p = participantes[index];
-            agregarRegistro(`🔇 Supervisor ha silenciado a ${p.nombre}`, 'mensaje');
-            alert(`🔇 Has silenciado a ${p.nombre}`);
+        // === OBTENER LISTA VISIBLE (Profesores + Alumnos) ===
+        function obtenerVisibles() {
+            const datos = localStorage.getItem(CLAVE_VISIBLES);
+            return datos ? JSON.parse(datos) : [];
         }
 
-        function expulsarParticipante(index) {
-            const p = participantes[index];
-            if (confirm(`¿Seguro que quieres expulsar a ${p.nombre} de la clase?`)) {
-                agregarRegistro(`⛔ ${p.nombre} ha sido expulsado por el supervisor`, 'salida');
-                alert(`⛔ ${p.nombre} ha sido desconectado de la clase`);
+        // === GUARDAR LISTA VISIBLE ===
+        function guardarVisibles(lista) {
+            localStorage.setItem(CLAVE_VISIBLES, JSON.stringify(lista));
+        }
+
+        // === AGREGARME A LA LISTA CORRESPONDIENTE ===
+        function agregarme() {
+            if (miRol === 'supervisor') {
+                // El supervisor NO se agrega a la lista visible — queda oculto
+                return;
+            }
+            // Profesor y Alumno SÍ aparecen en la lista
+            const lista = obtenerVisibles();
+            const nuevaLista = lista.filter(p => p.id !== miId);
+            nuevaLista.push({
+                id: miId,
+                nombre: miNombre,
+                rol: miRol,
+                hora: new Date().toLocaleTimeString()
+            });
+            guardarVisibles(nuevaLista);
+        }
+
+        // === QUITARME AL SALIR ===
+        function quitarme() {
+            if (miRol === 'supervisor') return;
+            const lista = obtenerVisibles();
+            const nuevaLista = lista.filter(p => p.id !== miId);
+            guardarVisibles(nuevaLista);
+        }
+
+        // === ACTUALIZAR LISTA QUE SE VE EN PANTALLA ===
+        function actualizarListaVisual() {
+            const lista = obtenerVisibles();
+            listaPersonas.innerHTML = '';
+
+            // Si soy supervisor, cuento TODOS pero no aparezco
+            // Si soy profesor/alumno, solo cuento visibles
+            contadorTotal.textContent = `${lista.length} conectado${lista.length !== 1 ? 's' : ''}`;
+
+            // Ordenar: Profesor primero, luego Alumnos
+            const orden = { profesor: 1, alumno: 2 };
+            lista.sort((a, b) => orden[a.rol] - orden[b.rol]);
+
+            lista.forEach(persona => {
+                const div = document.createElement('div');
+                div.className = `persona ${persona.rol}`;
+                
+                const icono = persona.rol === 'profesor' ? '👨‍🏫' : '👨‍🎓';
+                const etiqueta = persona.rol === 'profesor' ? 'Profesor' : 'Alumno';
+
+                div.innerHTML = `
+                    <span class="icono">${icono}</span>
+                    <span class="nombre">${persona.nombre}</span>
+                    <span class="etiqueta-rol ${persona.rol}">${etiqueta}</span>
+                    <span class="estado"></span>
+                `;
+                listaPersonas.appendChild(div);
+            });
+
+            // Si soy supervisor, veo un aviso especial
+            if (miRol === 'supervisor') {
+                const aviso = document.createElement('div');
+                aviso.style.marginTop = '20px';
+                aviso.style.padding = '15px';
+                aviso.style.background = '#f5f5f5';
+                aviso.style.borderRadius = '10px';
+                aviso.style.textAlign = 'center';
+                aviso.style.color = '#666';
+                aviso.innerHTML = `
+                    👁️ <em>Tú estás monitoreando en modo discreto — nadie sabe que estás aquí</em><br>
+                    <small>Total personas visibles: ${lista.length}</small>
+                `;
+                listaPersonas.appendChild(aviso);
             }
         }
 
-        function toggleCamara() {
-            camaraActiva = !camaraActiva;
-            const btn = document.getElementById('btn-camara');
-            btn.classList.toggle('activado', camaraActiva);
-            btn.classList.toggle('desactivado', !camaraActiva);
-            btn.textContent = camaraActiva ? '📷' : '📷❌';
-            if (streamLocal) streamLocal.getVideoTracks().forEach(track => track.enabled = camaraActiva);
-            agregarRegistro(`${nombreUsuario} ha ${camaraActiva ? 'activado' : 'desactivado'} su cámara`, 'mensaje');
-        }
-
-        function toggleMicrofono() {
-            microfonoActivo = !microfonoActivo;
-            const btn = document.getElementById('btn-microfono');
-            btn.classList.toggle('activado', microfonoActiva);
-            btn.classList.toggle('desactivado', !microfonoActiva);
-            btn.textContent = microfonoActivo ? '🎤' : '🎤❌';
-            if (streamLocal) streamLocal.getAudioTracks().forEach(track => track.enabled = microfonoActivo);
-            agregarRegistro(`${nombreUsuario} ha ${microfonoActiva ? 'activado' : 'silenciado'} su micrófono`, 'mensaje');
-        }
-
-        function levantarMano() {
-            agregarMensajeChat(nombreUsuario, '✋ ¡Tengo una pregunta!', rolUsuario);
-            agregarRegistro(`${nombreUsuario} ha levantado la mano`, 'mensaje');
-            alert('✋ Has levantado la mano. El profesor y supervisor lo han visto.');
-        }
-
-        async function compartirPantalla() {
-            try {
-                const pantallaStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-                agregarRegistro(`${nombreUsuario} está compartiendo su pantalla`, 'mensaje');
-                alert('🖥️ Estás compartiendo tu pantalla con todos los participantes');
-            } catch (error) {
-                alert('No se pudo compartir la pantalla');
+        // === ENTRAR A LA SALA ===
+        btnEntrar.addEventListener('click', () => {
+            miNombre = inputNombre.value.trim();
+            
+            if (!miNombre) {
+                alert('⚠️ Escribe tu nombre completo');
+                return;
             }
-        }
-
-        function enviarMensaje() {
-            const entrada = document.getElementById('entrada-chat');
-            const texto = entrada.value.trim();
-            if (!texto) return;
-            agregarMensajeChat(nombreUsuario, texto, rolUsuario);
-            agregarRegistro(`${nombreUsuario}: "${texto}"`, 'mensaje');
-            entrada.value = '';
-        }
-
-        function agregarMensajeChat(nombre, texto, rol) {
-            const cajaChat = document.getElementById('caja-chat');
-            const mensaje = document.createElement('div');
-            mensaje.className = `mensaje ${rol}`;
-            mensaje.innerHTML = `
-                <div class="mensaje-nombre">${nombre} ${rol === 'supervisor' ? '👁️' : ''}</div>
-                ${texto}
-            `;
-            cajaChat.appendChild(mensaje);
-            cajaChat.scrollTop = cajaChat.scrollHeight;
-        }
-
-        function agregarRegistro(texto, tipo) {
-            if (rolUsuario !== 'supervisor') return;
-            const registro = document.getElementById('registro-actividad');
-            const entrada = document.createElement('div');
-            entrada.className = `entrada-registro ${tipo}`;
-            entrada.innerHTML = `[${formatearHora(new Date())}] — ${texto}`;
-            registro.appendChild(entrada);
-            registro.scrollTop = registro.scrollHeight;
-        }
-
-        function formatearHora(fecha) {
-            return fecha.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function salirDelSalon() {
-            if (confirm('¿Seguro que quieres salir del salón de clases?')) {
-                agregarRegistro(`${nombreUsuario} ha salido del salón`, 'salida');
-                if (streamLocal) streamLocal.getTracks().forEach(track => track.stop());
-                location.reload();
+            if (!miRol) {
+                alert('⚠️ Selecciona tu rol');
+                return;
             }
-        }
+
+            miId = generarId();
+
+            // Cambiar pantalla
+            pantallaInicio.style.display = 'none';
+            pantallaSala.style.display = 'block';
+
+            // Configurar mi rol visualmente
+            let textoRol, claseRol;
+            if (miRol === 'profesor') {
+                textoRol = '👨‍🏫 Profesor';
+                claseRol = 'rol-profesor';
+            } else if (miRol === 'alumno') {
+                textoRol = '👨‍🎓 Alumno';
+                claseRol = 'rol-alumno';
+            } else {
+                textoRol = '👁️ Supervisor (Modo Incógnito)';
+                claseRol = 'rol-supervisor';
+                avisoSupervisor.style.display = 'block';
+            }
+            miRolElemento.textContent = textoRol;
+            miRolElemento.className = `mi-rol ${claseRol}`;
+
+            // Si soy supervisor, cambio el título para mí solo
+            if (miRol === 'supervisor') {
+                tituloSala.textContent = '👁️ Sala de Monitoreo — Modo Discreto';
+            }
+
+            // Agregarme a la lista (solo si NO soy supervisor)
+            agregarme();
+
+            // Mostrar la lista inicial
+            actualizarListaVisual();
+
+            // Actualizar cada 3 segundos
+            actualizarIntervalo = setInterval(actualizarListaVisual, 3000);
+        });
+
+        // === SALIR DE LA SALA ===
+        btnSalir.addEventListener('click', () => {
+            clearInterval(actualizarIntervalo);
+            quitarme();
+            pantallaSala.style.display = 'none';
+            pantallaInicio.style.display = 'block';
+            inputNombre.value = '';
+            roles.forEach(r => r.classList.remove('seleccionado'));
+            miRol = '';
+            avisoSupervisor.style.display = 'none';
+            tituloSala.textContent = '🏫 Sala de Clase en Vivo';
+        });
     </script>
 </body>
 </html>
