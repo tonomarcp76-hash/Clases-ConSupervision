@@ -3,58 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cámaras en Vivo - Clases con Supervisión</title>
+    <title>Clases con Supervisión - Cámaras y Chat</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
         body { background: #1a1a2e; color: white; min-height: 100vh; padding: 20px; }
         h1 { text-align: center; margin-bottom: 30px; color: #00f5d4; }
+        h2 { margin-bottom: 15px; color: #00f5d4; font-size: 18px; }
         .container { max-width: 1200px; margin: 0 auto; }
-        .camara { background: #16213e; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .camara h3 { margin-bottom: 15px; color: #00f5d4; }
-        video { width: 100%; max-width: 500px; border-radius: 8px; background: #000; transform: scaleX(-1); }
-        .btn { padding: 12px 24px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; margin: 10px; font-weight: bold; }
-        .btn-conectar { background: #00f5d4; color: #000; }
-        .btn-detener { background: #e94560; color: white; }
-        .estado { margin-top: 15px; padding: 10px; border-radius: 6px; background: #0f3460; }
+
+        .pantalla-roles { display: flex; justify-content: center; align-items: center; min-height: 70vh; gap: 40px; flex-wrap: wrap; }
+        .tarjeta-rol { background: #16213e; border-radius: 16px; padding: 40px; width: 300px; text-align: center; box-shadow: 0 6px 20px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.3s; }
+        .tarjeta-rol:hover { transform: scale(1.05); }
+        .tarjeta-rol.profesor { border: 3px solid #ffd700; }
+        .tarjeta-rol.alumno { border: 3px solid #00f5d4; }
+        .tarjeta-rol .icono { font-size: 60px; margin-bottom: 20px; }
+        .tarjeta-rol h3 { font-size: 24px; margin-bottom: 10px; }
+        .tarjeta-rol p { color: #aaa; font-size: 14px; }
+
+        .pantalla-principal { display: none; }
+        .fila-camaras { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .caja-camara { background: #16213e; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .etiqueta-rol { display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px; }
+        .etiqueta-profesor { background: #ffd700; color: #000; }
+        .etiqueta-alumno { background: #00f5d4; color: #000; }
+        video { width: 100%; border-radius: 8px; background: #000; transform: scaleX(-1); margin-bottom: 15px; min-height: 280px; }
+        .btn { padding: 12px 24px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; margin: 5px; font-weight: bold; }
+        .btn-verde { background: #00f5d4; color: #000; }
+        .btn-rojo { background: #e94560; color: white; }
+        .btn-amarillo { background: #ffd700; color: #000; }
+        .btn-salir { position: fixed; top: 20px; right: 20px; background: #e94560; color: white; z-index: 100; }
+        .estado { margin-top: 10px; padding: 10px; border-radius: 6px; background: #0f3460; }
+
+        .caja-chat { background: #16213e; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .caja-mensajes { height: 250px; overflow-y: auto; background: #0f3460; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .mensaje { margin-bottom: 12px; padding: 10px; border-radius: 8px; max-width: 80%; }
+        .mensaje-propio { background: #00f5d4; color: #000; margin-left: auto; }
+        .mensaje-otro { background: #e94560; color: white; margin-right: auto; }
+        .mensaje .hora { font-size: 11px; opacity: 0.7; margin-top: 5px; }
+        .entrada-chat { display: flex; gap: 10px; }
+        #textoMensaje { flex: 1; padding: 12px; border-radius: 8px; border: none; background: #0f3460; color: white; font-size: 15px; }
+        .btn-enviar { background: #00f5d4; color: #000; padding: 12px 20px; }
+
+        @media (max-width: 768px) {
+            .fila-camaras { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📹 Cámaras en Vivo - Clases con Supervisión</h1>
-        <div class="camara">
-            <h3>Tu Cámara 📷</h3>
-            <video id="videoLocal" autoplay playsinline></video>
-            <br>
-            <button class="btn btn-conectar" onclick="iniciarCamara()">🎬 Activar Cámara</button>
-            <button class="btn btn-detener" onclick="detenerCamara()">🛑 Detener</button>
-            <div class="estado" id="estado">⏳ Esperando activar cámara...</div>
+
+    <button class="btn btn-salir" onclick="salir()">🚪 Salir</button>
+
+    <div class="pantalla-roles" id="pantallaRoles">
+        <div class="tarjeta-rol profesor" onclick="entrarComo('profesor')">
+            <div class="icono">👨‍🏫</div>
+            <h3>Profesor</h3>
+            <p>Ver cámaras, supervisar clase, enviar mensajes</p>
+        </div>
+        <div class="tarjeta-rol alumno" onclick="entrarComo('alumno')">
+            <div class="icono">👨‍🎓</div>
+            <h3>Alumno</h3>
+            <p>Activar cámara, participar, enviar mensajes</p>
+        </div>
+    </div>
+
+    <div class="pantalla-principal" id="pantallaPrincipal">
+        <h1>📹 Clase en Vivo - <span id="nombreRol"></span></h1>
+        
+        <div class="fila-camaras">
+            <div class="caja-camara">
+                <span class="etiqueta-rol etiqueta-profesor">👨‍🏫 Profesor</span>
+                <video id="videoProfesor" autoplay playsinline muted></video>
+                <br>
+                <button class="btn btn-amarillo" id="btnCamaraProfesor" onclick="activarCamara('profesor')">🎬 Activar Mi Cámara</button>
+                <button class="btn btn-rojo" onclick="detenerCamara('profesor')">🛑 Detener</button>
+                <div class="estado" id="estadoProfesor">⏳ Esperando...</div>
+            </div>
+
+            <div class="caja-camara">
+                <span class="etiqueta-rol etiqueta-alumno">👨‍🎓 Alumno</span>
+                <video id="videoAlumno" autoplay playsinline muted></video>
+                <br>
+                <button class="btn btn-verde" id="btnCamaraAlumno" onclick="activarCamara('alumno')">🎬 Activar Mi Cámara</button>
+                <button class="btn btn-rojo" onclick="detenerCamara('alumno')">🛑 Detener</button>
+                <div class="estado" id="estadoAlumno">⏳ Esperando...</div>
+            </div>
+        </div>
+
+        <div class="caja-chat">
+            <h2>💬 Chat de la Clase</h2>
+            <div class="caja-mensajes" id="cajaMensajes">
+                <div style="text-align:center; color:#888; padding:20px;">✅ Conectado en tiempo real con Firebase! Escribe tu primer mensaje ✍️</div>
+            </div>
+            <div class="entrada-chat">
+                <input type="text" id="textoMensaje" placeholder="Escribe tu mensaje..." onkeypress="if(event.key === 'Enter') enviarMensaje()">
+                <button class="btn btn-enviar" onclick="enviarMensaje()">📤 Enviar</button>
+            </div>
         </div>
     </div>
 
     <script>
-        let streamLocal = null;
+        const firebaseConfig = {
+            apiKey: "AIZaSyCFWxrLP77QblShCdUvjuDbg-X98yfyAo",
+            authDomain: "clases-consupervision.firebaseapp.com",
+            projectId: "clases-consupervision",
+            storageBucket: "clases-consupervision.appspot.com",
+            messagingSenderId: "125682581947",
+            appId: "1:125682581947:web:e93e303b30b6979924849e",
+            measurementId: "G-3MMT4ZWQJW"
+        };
 
-        async function iniciarCamara() {
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const mensajesRef = db.ref('mensajes');
+        
+        let rolActual = null;
+        let streamLocal = null;
+        let escuchandoMensajes = false;
+
+        function iniciarEscuchaMensajes() {
+            if (escuchandoMensajes) return;
+            escuchandoMensajes = true;
+
+            mensajesRef.on('child_added', (snapshot) => {
+                const msg = snapshot.val();
+                const caja = document.getElementById('cajaMensajes');
+                
+                const yaExiste = document.querySelector(`[data-msg-id="${msg.id}"]`);
+                if (yaExiste) return;
+
+                const esMio = msg.rol === rolActual;
+                const div = document.createElement('div');
+                div.setAttribute('data-msg-id', msg.id);
+                div.className = `mensaje ${esMio ? 'mensaje-propio' : 'mensaje-otro'}`;
+                div.innerHTML = `
+                    <strong>${msg.rol === 'profesor' ? '👨‍🏫 Profesor' : '👨‍🎓 Alumno'}:</strong> ${msg.texto}
+                    <div class="hora">${msg.hora}</div>
+                `;
+                caja.appendChild(div);
+                caja.scrollTop = caja.scrollHeight;
+            });
+        }
+
+        function entrarComo(rol) {
+            rolActual = rol;
+            document.getElementById('pantallaRoles').style.display = 'none';
+            document.getElementById('pantallaPrincipal').style.display = 'block';
+            document.getElementById('nombreRol').textContent = rol === 'profesor' ? 'Profesor' : 'Alumno';
+            
+            if (rol === 'profesor') {
+                document.getElementById('btnCamaraAlumno').style.display = 'none';
+            } else {
+                document.getElementById('btnCamaraProfesor').style.display = 'none';
+            }
+
+            iniciarEscuchaMensajes();
+            agregarMensajeSistema(`✅ ${rol === 'profesor' ? 'Profesor' : 'Alumno'} ha entrado a la clase`);
+        }
+
+        async function activarCamara(tipo) {
             try {
-                document.getElementById('estado').innerHTML = "📡 Solicitando permiso de cámara...";
+                const estado = document.getElementById('estado' + tipo.charAt(0).toUpperCase() + tipo.slice(1));
+                const video = document.getElementById('video' + tipo.charAt(0).toUpperCase() + tipo.slice(1));
+                
+                estado.innerHTML = "📡 Solicitando permiso...";
+                
                 streamLocal = await navigator.mediaDevices.getUserMedia({ 
                     video: { width: 1280, height: 720, facingMode: "user" }, 
                     audio: false 
                 });
-                document.getElementById('videoLocal').srcObject = streamLocal;
-                document.getElementById('estado').innerHTML = "✅ Cámara activada - ¡Funcionando!";
+                
+                video.srcObject = streamLocal;
+                estado.innerHTML = "✅ Cámara activada - ¡En vivo!";
+                agregarMensajeSistema(`📷 ${tipo === 'profesor' ? 'Profesor' : 'Alumno'} activó su cámara`);
+
             } catch (error) {
-                console.error("Error:", error);
-                document.getElementById('estado').innerHTML = "❌ Error: " + error.message + "<br>Asegúrate de dar permiso a la cámara";
+                document.getElementById('estado' + tipo.charAt(0).toUpperCase() + tipo.slice(1)).innerHTML = "❌ " + error.message;
             }
         }
 
-        function detenerCamara() {
+        function detenerCamara(tipo) {
+            const video = document.getElementById('video' + tipo.charAt(0).toUpperCase() + tipo.slice(1));
+            const estado = document.getElementById('estado' + tipo.charAt(0).toUpperCase() + tipo.slice(1));
+            
             if (streamLocal) {
                 streamLocal.getTracks().forEach(track => track.stop());
                 streamLocal = null;
-                document.getElementById('videoLocal').srcObject = null;
-                document.getElementById('estado').innerHTML = "🛑 Cámara detenida";
+                video.srcObject = null;
+                estado.innerHTML = "🛑 Cámara detenida";
+                agregarMensajeSistema(`🛑 ${tipo === 'profesor' ? 'Profesor' : 'Alumno'} apagó su cámara`);
+            }
+        }
+
+        function enviarMensaje() {
+            const texto = document.getElementById('textoMensaje').value.trim();
+            if (!texto) return;
+
+            const hora = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+            const id = Date.now().toString();
+            
+            mensajesRef.push({
+                id: id,
+                rol: rolActual,
+                texto: texto,
+                hora: hora
+            });
+
+            document.getElementById('textoMensaje').value = '';
+        }
+
+        function agregarMensajeSistema(texto) {
+            const caja = document.getElementById('cajaMensajes');
+            const msg = document.createElement('div');
+            msg.style.textAlign = 'center';
+            msg.style.color = '#888';
+            msg.style.fontSize = '13px';
+            msg.style.margin = '10px 0';
+            msg.textContent = `— ${texto} —`;
+            caja.appendChild(msg);
+            caja.scrollTop = caja.scrollHeight;
+        }
+
+        function salir() {
+            if (confirm('¿Seguro quieres salir de la clase?')) {
+                if (streamLocal) streamLocal.getTracks().forEach(t => t.stop());
+                rolActual = null;
+                document.getElementById('pantallaPrincipal').style.display = 'none';
+                document.getElementById('pantallaRoles').style.display = 'flex';
             }
         }
     </script>
