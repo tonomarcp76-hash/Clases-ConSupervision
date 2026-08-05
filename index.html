@@ -16,106 +16,47 @@
         .btn-conectar { background: #00f5d4; color: #000; }
         .btn-detener { background: #e94560; color: white; }
         .estado { margin-top: 15px; padding: 10px; border-radius: 6px; background: #0f3460; }
-        .compartir { margin-top: 20px; padding: 15px; background: #0f3460; border-radius: 8px; }
-        input[type="text"] { width: 100%; padding: 10px; margin-top: 10px; border-radius: 6px; border: none; background: #16213e; color: white; }
     </style>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>📹 Cámaras en Vivo - Clases con Supervisión</h1>
-
         <div class="camara">
             <h3>Tu Cámara 📷</h3>
             <video id="videoLocal" autoplay playsinline></video>
             <br>
             <button class="btn btn-conectar" onclick="iniciarCamara()">🎬 Activar Cámara</button>
             <button class="btn btn-detener" onclick="detenerCamara()">🛑 Detener</button>
-            
-            <div class="estado" id="estado">
-                ⏳ Esperando activar cámara...
-            </div>
-
-            <div class="compartir">
-                <h4>🔗 Tu ID de conexión:</h4>
-                <input type="text" id="miId" readonly>
-                <p style="margin-top:10px; font-size:14px;">Comparte tu ID con el supervisor para que te vea</p>
-            </div>
+            <div class="estado" id="estado">⏳ Esperando activar cámara...</div>
         </div>
     </div>
 
     <script>
-        // ===== TU CONFIGURACIÓN DE FIREBASE =====
-        const firebaseConfig = {
-            apiKey: "AIzaSyAqD3qCS2jYeXYTSVbQ4Iy5NQ_18LGxCUL0",
-            authDomain: "clasesconsupervision.firebaseapp.com",
-            projectId: "clasesconsupervision",
-            storageBucket: "clasesconsupervision.firebasestorage.app",
-            messagingSenderId: "193271073656",
-            appId: "1:193271073656:web:6ee8635396fc84e74b568d"
-        };
-
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        // Variables globales
         let streamLocal = null;
-        const miIdUsuario = Math.random().toString(36).substring(2, 10);
-        document.getElementById('miId').value = miIdUsuario;
 
-        // Referencia en Firebase
-        const refCamaras = db.ref('camaras/' + miIdUsuario);
-
-        // Iniciar cámara
         async function iniciarCamara() {
             try {
                 document.getElementById('estado').innerHTML = "📡 Solicitando permiso de cámara...";
-                
                 streamLocal = await navigator.mediaDevices.getUserMedia({ 
                     video: { width: 1280, height: 720, facingMode: "user" }, 
                     audio: false 
                 });
-                
                 document.getElementById('videoLocal').srcObject = streamLocal;
-                document.getElementById('estado').innerHTML = "✅ Cámara activada - ¡Conectado al servidor!";
-                
-                // Registrar en Firebase
-                await refCamaras.set({
-                    id: miIdUsuario,
-                    activo: true,
-                    ultimaConexion: firebase.database.ServerValue.TIMESTAMP,
-                    usuario: "Cámara-" + miIdUsuario
-                });
-
-                // Actualizar estado cada 5 segundos
-                setInterval(() => {
-                    refCamaras.update({ ultimaConexion: firebase.database.ServerValue.TIMESTAMP });
-                }, 5000);
-
+                document.getElementById('estado').innerHTML = "✅ Cámara activada - ¡Funcionando!";
             } catch (error) {
                 console.error("Error:", error);
                 document.getElementById('estado').innerHTML = "❌ Error: " + error.message + "<br>Asegúrate de dar permiso a la cámara";
             }
         }
 
-        // Detener cámara
         function detenerCamara() {
             if (streamLocal) {
                 streamLocal.getTracks().forEach(track => track.stop());
                 streamLocal = null;
                 document.getElementById('videoLocal').srcObject = null;
                 document.getElementById('estado').innerHTML = "🛑 Cámara detenida";
-                refCamaras.update({ activo: false });
             }
         }
-
-        // Al cerrar la página
-        window.addEventListener('beforeunload', () => {
-            refCamaras.update({ activo: false });
-        });
     </script>
 </body>
 </html>
